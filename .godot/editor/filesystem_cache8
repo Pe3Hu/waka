@@ -1,0 +1,44 @@
+2a60927148abd1d33b818b535e306557
+::res://::1683035156
+icon.png::CompressedTexture2D::2432420761471245026::1676094585::1682073341::1::::<><>::
+icon.svg::CompressedTexture2D::9162371498834860976::1679058444::1682073341::1::::<><>::
+README.md::TextFile::-1::1682165399::0::1::::<><>::
+::res://asset/::1683032719
+default_env.tres::Environment::-1::1677963175::0::1::::<><>::
+::res://asset/font/::1683032717
+2TECH2.TTF::FontFile::5317224592551952209::1682126232::1682151714::1::::<><>::
+ALBA____.TTF::FontFile::4234611237747425266::1673874020::1682073340::1::::<><>::
+basic_label_setting.tres::LabelSettings::8721648622212071911::1682973059::0::1::::<><>::uid://dk3ytja0i6utv
+branca.png::CompressedTexture2D::649807052670154750::1673874020::1682073341::1::::<><>::
+ELEPHNT.TTF::FontFile::7920444676341858691::1673874020::1682073340::1::::<><>::
+Marlboro.ttf::FontFile::1499582478604000857::1673874020::1682073340::1::::<><>::
+metal lord ot.otf::FontFile::3619300847126422558::1682126186::1682151714::1::::<><>::
+metal lord tt.ttf::FontFile::2279325660531950762::1682126186::1682151714::1::::<><>::
+neuropol x rg ot.otf::FontFile::1985414034878934266::1682126178::1682151714::1::::<><>::
+neuropol x rg tt.ttf::FontFile::2835359182270942062::1682126178::1682151714::1::::<><>::
+neuropolitical rg.otf::FontFile::2325526762121942984::1336566082::1682151714::1::::<><>::
+rimouski sb.otf::FontFile::2683584631797712805::1657615528::1682151714::1::::<><>::
+Sabandija-font-ffp.ttf::FontFile::9201959610161765482::1673874020::1682073340::1::::<><>::
+vinque rg.otf::FontFile::4667643456426473135::1570966408::1682151714::1::::<><>::
+::res://asset/json/::1683032814
+::res://asset/png/::1683036000
+circle_black_16.png::CompressedTexture2D::8621509779724911139::1679229887::1682073341::1::::<><>::
+::res://asset/png/sektor/::1683035145
+empty.png::CompressedTexture2D::1763396454069034803::1682149968::1682150005::1::::<><>::
+filled.png::CompressedTexture2D::8616010504473682836::1682149973::1682150005::1::::<><>::
+::res://asset/tileset/::1683033447
+hex.tres::MeshLibrary::4853583784148232087::1683033447::0::1::::<><>::
+::res://scene/::1683036869
+::res://scene/0/::1683033932
+Insel.tscn::PackedScene::5124351785616124605::1683033932::0::1::::<><>::
+gebiet.tscn::PackedScene::4831893436203397870::1683037375::0::1::::<><>::
+::res://scene/1/::1683037048
+Map.tscn::PackedScene::8379487103536261067::1683037048::0::1::::<><>::
+::res://scene/game/::1683037047
+Game.gd::GDScript::-1::1683036531::0::1::::<>Node<>::
+Game.tscn::PackedScene::8246655032211948728::1683037047::0::1::::<><>::res://scene/game/Game.gd<>uid://drnc6tfl7u26b
+::res://script/::1683037047
+Classes_0.gd::GDScript::-1::1683033373::0::1::::<>Node<>::
+Classes_1.gd::GDScript::-1::1683037375::0::1::::<>Node<>::
+Global.gd::GDScript::-1::1683036506::0::1::::<>Node<>::
+MapDraw.gd::GDScript::-1::1683037035::0::1::::<>Node2D<>::
