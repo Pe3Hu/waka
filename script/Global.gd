@@ -15,17 +15,17 @@ var scene = {}
 func init_num() -> void:
 	num.index = {}
 	
-	num.map = {}
-	num.map.rings = 25
-	num.map.sectors = 3
-	num.map.boundary = 3
-	num.map.a = 10
-	num.map.h = 2*num.map.a
-	num.map.w = sqrt(3)*num.map.a
-	num.map.neighbors = 6
+	num.insel = {}
+	num.insel.rings = 25
+	num.insel.sectors = 3
+	num.insel.boundary = 3
+	num.insel.a = 10
+	num.insel.h = 2*num.insel.a
+	num.insel.w = sqrt(3)*num.insel.a
+	num.insel.neighbors = 6
 	
 	num.meilenstein = {}
-	num.meilenstein.n = num.map.rings*2-1
+	num.meilenstein.n = num.insel.rings*2-1
 	num.meilenstein.rows = 4+(num.meilenstein.n-1)*2
 	num.meilenstein.cols = 1+num.meilenstein.n
 
@@ -84,6 +84,7 @@ func init_arr() -> void:
 	arr.sequence["A001358"] = [4, 6, 9, 10, 14, 15, 21, 22, 25, 26]
 	arr.sequence["B000000"] = [2, 3, 5, 8, 10, 13, 17, 20, 24, 29, 33, 38]
 	arr.color = ["Red","Green","Blue","Yellow"]
+	arr.element = ["Aqua","Wind","Fire","Earth"]
 	
 	arr.neighbor = [
 		[
@@ -131,6 +132,7 @@ func init_node() -> void:
 func init_scene() -> void:
 	scene.insel = load("res://scene/0/insel.tscn")
 	scene.gebiet = load("res://scene/0/gebiet.tscn")
+	scene.wohnwagen = load("res://scene/1/wohnwagen.tscn")
 
 
 func init_vec():
@@ -138,11 +140,11 @@ func init_vec():
 	vec.offset = {}
 	init_window_size()
 	
-	vec.offset.map = vec.size.window.center
-	vec.offset.map.y -= Global.num.map.h/2
-	vec.offset.map.x -= Global.num.map.w
-	vec.offset.map.x -= (num.meilenstein.rows-1)*num.map.w / 4
-	vec.offset.map.y -= (num.meilenstein.cols+0.5*(num.meilenstein.n-1))*num.map.h / 4
+	vec.offset.insel = vec.size.window.center
+	vec.offset.insel.y -= Global.num.insel.h/2
+	vec.offset.insel.x -= Global.num.insel.w
+	vec.offset.insel.x -= (num.meilenstein.rows-1)*num.insel.w / 4
+	vec.offset.insel.y -= (num.meilenstein.cols+0.5*(num.meilenstein.n-1))*num.insel.h / 4
 
 
 func init_window_size():

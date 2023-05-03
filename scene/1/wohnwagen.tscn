@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://cs4kuhx00l51o"]
+
+[ext_resource type="Script" path="res://scene/1/wohnwagen.gd" id="1_xuvtg"]
+
+[node name="Wohnwagen" type="Polygon2D"]
+script = ExtResource("1_xuvtg")
+
+[node name="Moving" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="timeout" from="Moving" to="." method="_on_moving_timeout"]

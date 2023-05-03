@@ -5,9 +5,26 @@ extends Node
 class Meilenstein:
 	var vec = {}
 
+
 	func _init(input_):
 		vec.grid = input_.grid
 		vec.position = input_.position
+
+
+#Месторождение руды
+class Erzlager:
+	var word = {}
+	var num = {}
+	var obj = {}
+
+
+	func _init(input_):
+		word.element = ""
+		obj.gebiet = input_.gebiet
+		num.abundance = {}
+		num.abundance.max = 1000
+		num.abundance.current = 0
+		num.abundance.ejection = num.abundance.max*0.8
 
 
 #Область
@@ -24,21 +41,37 @@ class Gebiet:
 
 	func _init(input_) -> void:
 		vec.grid = input_.grid
-		vec.center = Vector2()
 		num.parity = int(vec.grid.y)%2
+		num.w = Global.num.insel.w
 		arr.meilenstein = input_.meilensteins
 		dict.neighbor = {}
 		obj.insel = input_.insel
 		obj.cluster = null
+		obj.wohnwagen = null
 		flag.on_screen = true
 		color.background = Color()
 		init_scene()
+		set_center()
+		init_erzlager()
 
 
 	func init_scene() -> void:
 		scene.myself = Global.scene.gebiet.instantiate()
 		scene.myself.set_parent(self)
 		obj.insel.scene.myself.add_child(scene.myself)
+
+
+	func init_erzlager() -> void:
+		var input = {}
+		input.gebiet = self
+		obj.erzlager = Classes_0.Erzlager.new(input)
+
+
+	func set_center() -> void:
+		vec.center = Vector2()
+		
+		for meilenstein in arr.meilenstein:
+			vec.center += meilenstein.vec.position/arr.meilenstein.size()
 
 
 #Кластер
@@ -50,12 +83,13 @@ class Cluster:
 
 
 	func _init(input_) -> void:
-		word.color = "White"
+		word.element = null
 		arr.gebiet = input_.gebiets
 		arr.neighbor = []
 		obj.center = input_.center
 		obj.insel = input_.insel
 		flag.on_screen = true
+		flag.eruption = false
 		
 		for gebiet in arr.gebiet:
 			gebiet.obj.cluster = self
@@ -78,14 +112,59 @@ class Cluster:
 	func clean() -> void:
 		for gebiet in arr.gebiet:
 			gebiet.flag.on_screen = false
-			gebiet.scene.myself.recolor()
+			gebiet.scene.myself.recolor_by_erzlager()
 		
 		obj.insel.arr.cluster.erase(self)
 
 
+	func set_gebiet_elements() -> void:
+		for gebiet in arr.gebiet:
+			gebiet.obj.erzlager.word.element = word.element
+		
+		paint_gebiets()
+
+
 	func paint_gebiets() -> void:
 		for gebiet in arr.gebiet:
-			gebiet.scene.myself.recolor()
+			gebiet.scene.myself.recolor_by_erzlager()
+
+
+	func rng_spill(ejection_) -> void:
+		var rest_ejection = ejection_
+		var gebiets = []
+		gebiets.append_array(arr.gebiet)
+		gebiets.shuffle()
+		
+		for gebiet in gebiets:
+			var max_ejection = min(gebiet.obj.erzlager.num.abundance.ejection, rest_ejection)
+			var min_ejection = min(0.1*ejection_,rest_ejection)
+			Global.rng.randomize()
+			var flow = Global.rng.randi_range(min_ejection, max_ejection)
+			#print(flow," < ",rest_ejection, " < ", max_ejection)
+			rest_ejection -= flow
+			gebiet.obj.erzlager.num.abundance.current += flow
+		
+		gebiets.back().obj.erzlager.num.abundance.current += rest_ejection
+		
+		paint_gebiets()
+
+
+	func flow_spill(ejection_) -> void:
+		var rest_ejection = 0
+		var flows = [0.27,0.25,0.23,0.1,0.08,0.06,0.01]
+		var gebiets = []
+		gebiets.append_array(arr.gebiet)
+		gebiets.shuffle()
+		
+		for _i in gebiets.size():
+			var gebiet = gebiets[_i]
+			var flow = min(gebiet.obj.erzlager.num.abundance.ejection, flows[_i]*ejection_)
+			rest_ejection += flows[_i]*ejection_-flow
+			gebiet.obj.erzlager.num.abundance.current += flow
+		
+		gebiets.back().obj.erzlager.num.abundance.current += rest_ejection
+		
+		paint_gebiets()
 
 
 #Остров
@@ -100,6 +179,7 @@ class Insel:
 		init_meilensteins()
 		init_gebiets()
 		init_clusters()
+		eruption_of_elements()
 
 
 	func init_scene() -> void:
@@ -109,19 +189,19 @@ class Insel:
 
 	func init_meilensteins() -> void:
 		arr.meilenstein = []
-		var vec = Vector2(Global.vec.offset.map.x, Global.vec.offset.map.y)
+		var vec = Vector2(Global.vec.offset.insel.x, Global.vec.offset.insel.y)
 		var x_shifts = [0,1,1,0]
 		var y_shifts = [1,0,1,0]
 		
 		for _i in Global.num.meilenstein.rows:
 			arr.meilenstein.append([])
-			vec.y += Global.num.map.h/4
+			vec.y += Global.num.insel.h/4
 			
-			vec.y += y_shifts[_i%y_shifts.size()]*Global.num.map.h/4
-			vec.x += x_shifts[_i%x_shifts.size()]*Global.num.map.w/2
+			vec.y += y_shifts[_i%y_shifts.size()]*Global.num.insel.h/4
+			vec.x += x_shifts[_i%x_shifts.size()]*Global.num.insel.w/2
 			
 			for _j in Global.num.meilenstein.cols:
-				vec.x += Global.num.map.w
+				vec.x += Global.num.insel.w
 				
 				var input = {}
 				input.position = vec
@@ -129,7 +209,7 @@ class Insel:
 				var meilenstein = Classes_0.Meilenstein.new(input)
 				arr.meilenstein[_i].append(meilenstein)
 				
-			vec.x = Global.vec.offset.map.x
+			vec.x = Global.vec.offset.insel.x
 
 
 	func init_gebiets() -> void:
@@ -192,7 +272,7 @@ class Insel:
 		add_second_cluster()
 		set_all_remaining_clusters()
 		remove_incomplete_clusters() 
-		set_cluster_colors()
+		set_cluster_elements()
 
 
 	func add_cluster_by_center(center_) -> void:
@@ -257,36 +337,6 @@ class Insel:
 				gebiet.flag.on_screen = false
 
 
-	func set_clusters_around_center() -> void:
-		var borderland = []
-		
-		for cluster in arr.cluster:
-			for gebiet in cluster.arr.gebiet:
-				for neighbor in gebiet.dict.neighbor.keys():
-					if neighbor.obj.cluster == null and neighbor.flag.on_screen and !borderland.has(neighbor):
-						borderland.append(neighbor)
-		
-		for gebiet in borderland:
-			gebiet.color.background = Color("blue")
-			gebiet.scene.myself.recolor(gebiet.color.background)
-		
-		while borderland.size() > 1:
-			var pair = get_pair_from_borderland(borderland)
-			print("pair size ", pair.size())
-			if pair.size() > 0:
-				add_cluster_by_pair(pair)
-				#pair.front().color.background = Color("green")
-				#pair.front().scene.myself.recolor(pair.front().color.background)
-				#pair.back().color.background = Color("blue")
-				#pair.back().scene.myself.recolor(pair.back().color.background)
-			
-				for _i in range(borderland.size()-1,-1,-1):
-					var gebiet = borderland[_i]
-					
-					if gebiet.obj.cluster != null && gebiet.flag.on_screen:
-						borderland.erase(gebiet)
-
-
 	func get_pair_from_borderland(borderland_) -> Array:
 		var datas = []
 		
@@ -323,55 +373,6 @@ class Insel:
 				return [first,second]
 		
 		return []
-
-
-	func set_all_remaining_clusters_0() -> void:
-		var unclustered = {}
-		
-		for gebiets in arr.gebiet:
-			for gebiet in gebiets:
-				unclustered[gebiet] = []
-		
-		for cluster in arr.cluster:
-			for gebiet in cluster.arr.gebiet:
-				for neighbor in gebiet.dict.neighbor.keys():
-					if neighbor.obj.cluster == null and neighbor.flag.on_screen and !unclustered[neighbor].has(cluster):
-						unclustered[neighbor].append(cluster)
-		
-		var counter = 0
-		var stoper = 1
-		
-		while unclustered.keys().size() > 100 and counter < stoper:
-			add_next_cluster(unclustered)
-			counter += 1
-
-
-	func add_next_cluster_0(unclustered_) -> void:
-		var options = []
-		
-		for gebiet in unclustered_.keys():
-			if unclustered_[gebiet].size() == 2:
-				options.append(gebiet)
-		
-		var first = Global.get_random_element(options)
-		var seconds = []
-		
-		for neighbor in first.dict.neighbor.keys():
-			if unclustered_.keys().has(neighbor): 
-				if unclustered_[neighbor].size() > 0:
-					seconds.append(neighbor)
-		
-		if seconds.size() > 0:
-			var second = Global.get_random_element(seconds)
-			add_cluster_by_pair([first, second])
-		
-		for gebiet in arr.cluster.back().arr.gebiet:
-			unclustered_.erase(gebiet)
-			
-			for neighbor in gebiet.dict.neighbor.keys():
-				if unclustered_.keys().has(neighbor):
-					if !unclustered_[neighbor].has(arr.cluster.back()):
-						unclustered_[neighbor].append(arr.cluster.back())
 
 
 	func set_all_remaining_clusters() -> void:
@@ -458,26 +459,105 @@ class Insel:
 			for gebiet in gebiets:
 				if gebiet.obj.cluster == null:
 					gebiet.flag.on_screen = false
-					gebiet.scene.myself.recolor()
+					gebiet.scene.myself.recolor_by_erzlager()
 
 
-	func set_cluster_colors() -> void:
+	func set_cluster_elements() -> void:
 		var origin = arr.cluster.front()
-		var unpainted = [origin]
+		var unelemented = [origin]
 		
-		while unpainted.size() > 0:
-			var cluster = unpainted.pop_front()
-			var colors = []
-			colors.append_array(Global.arr.color)
+		while unelemented.size() > 0:
+			var cluster = unelemented.pop_front()
+			var elements = []
+			elements.append_array(Global.arr.element)
 			
 			for neighbor in cluster.arr.neighbor:
-				colors.erase(neighbor.word.color)
+				elements.erase(neighbor.word.element)
 				
-				if neighbor.word.color == "White" && !unpainted.has(neighbor):
-					unpainted.append(neighbor)
+				if neighbor.word.element == null && !unelemented.has(neighbor):
+					unelemented.append(neighbor)
 			
-			cluster.word.color = Global.get_random_element(colors)
-			cluster.paint_gebiets()
+			cluster.word.element = Global.get_random_element(elements)
+			cluster.set_gebiet_elements()
+
+
+	func eruption_of_elements() -> void:
+		var clusters = []
+		var ejections = {}
+		var norm = {}
+		
+		for element in Global.arr.element:
+			ejections[element] = 0
+			norm[element] = 1.0/Global.arr.element.size()
+		
+		#norm["Aqua"] -= 0.125
+		#norm["Wind"] -= 0.125
+		#norm["Fire"] += 0.125*3
+		#norm["Earth"] -= 0.125
+		var total_ejection = 0
+		
+		for cluster in arr.cluster:
+			var empty = true
+			
+			for neighbor in cluster.arr.neighbor:
+				empty = !neighbor.flag.eruption and empty
+			
+			if empty:
+				clusters.append(cluster)
+		
+		while clusters.size() > 0:
+			var elements = []
+			
+			if total_ejection != 0:
+				for element in Global.arr.element: 
+					if norm[element] >= float(ejections[element])/total_ejection:
+						elements.append(element)
+			else:
+				elements.append_array(Global.arr.element)
+			
+			var options = []
+			
+			for cluster in clusters:
+				if elements.has(cluster.word.element):
+					options.append(cluster)
+			
+			if options.size() > 0:
+				var cluster = Global.get_random_element(options)
+				var ejection = cluster.obj.center.obj.erzlager.num.abundance.max*3
+				clusters.erase(cluster)
+				
+				for neighbor in cluster.arr.neighbor:
+					clusters.erase(neighbor)
+				
+				cluster.flag.eruption = true
+				cluster.rng_spill(ejection)
+				ejections[cluster.word.element] += ejection
+				total_ejection += ejection
+			else:
+				clusters = []
+	
+		for element in ejections.keys():
+			ejections[element] = float(ejections[element])/total_ejection
+		
+		print(ejections)
+
+
+	func get_clusters_around_cluster(cluster_, rings_) -> Array:
+		var arounds = [[cluster_]]
+		var totals = [cluster_]
+		
+		for _i in rings_:
+			var next_ring = []
+			
+			for _j in range(arounds[_i].size()-1,-1,-1):
+				for neighbor in arounds[_i][_j].arr.neighbor:
+					if !totals.has(neighbor):
+						next_ring.append(neighbor)
+						totals.append(neighbor)
+			
+			arounds.append(next_ring)
+		
+		return arounds
 
 
 	func check_meilenstein(grid_) -> bool:

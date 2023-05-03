@@ -17,3 +17,5 @@ offset_bottom = 23.0
 [node name="Layer2" type="Node" parent="."]
 
 [node name="Layer5" type="Node" parent="."]
+
+[node name="Wohnwagens" type="Node2D" parent="."]
