@@ -1,9 +1,8 @@
-res://scene/0/gebiet.tscn
 res://scene/game/Game.tscn
+res://scene/0/gebiet.tscn
+res://scene/1/wohnwagen.tscn
+res://scene/game/Game.gd
+res://scene/1/wohnwagen.gd
 res://script/Classes_1.gd
 res://script/Classes_0.gd
-res://scene/game/Game.gd
-res://scene/1/wohnwagen.tscn
 res://scene/0/gebiet.gd
-res://scene/1/wohnwagen.gd
-res://script/Global.gd

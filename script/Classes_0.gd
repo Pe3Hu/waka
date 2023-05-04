@@ -15,16 +15,18 @@ class Meilenstein:
 class Erzlager:
 	var word = {}
 	var num = {}
+	var arr = {}
 	var obj = {}
 
 
 	func _init(input_):
 		word.element = ""
 		obj.gebiet = input_.gebiet
-		num.abundance = {}
-		num.abundance.max = 1000
-		num.abundance.current = 0
-		num.abundance.ejection = num.abundance.max*0.8
+		num.fossil = {}
+		num.fossil.max = 1000
+		num.fossil.current = 0
+		num.fossil.ejection = num.fossil.max*0.8
+		arr.access = []
 
 
 #Область
@@ -136,15 +138,15 @@ class Cluster:
 		gebiets.shuffle()
 		
 		for gebiet in gebiets:
-			var max_ejection = min(gebiet.obj.erzlager.num.abundance.ejection, rest_ejection)
+			var max_ejection = min(gebiet.obj.erzlager.num.fossil.ejection, rest_ejection)
 			var min_ejection = min(0.1*ejection_,rest_ejection)
 			Global.rng.randomize()
 			var flow = Global.rng.randi_range(min_ejection, max_ejection)
 			#print(flow," < ",rest_ejection, " < ", max_ejection)
 			rest_ejection -= flow
-			gebiet.obj.erzlager.num.abundance.current += flow
+			gebiet.obj.erzlager.num.fossil.current += flow
 		
-		gebiets.back().obj.erzlager.num.abundance.current += rest_ejection
+		gebiets.back().obj.erzlager.num.fossil.current += rest_ejection
 		
 		paint_gebiets()
 
@@ -158,11 +160,11 @@ class Cluster:
 		
 		for _i in gebiets.size():
 			var gebiet = gebiets[_i]
-			var flow = min(gebiet.obj.erzlager.num.abundance.ejection, flows[_i]*ejection_)
+			var flow = min(gebiet.obj.erzlager.num.fossil.ejection, flows[_i]*ejection_)
 			rest_ejection += flows[_i]*ejection_-flow
-			gebiet.obj.erzlager.num.abundance.current += flow
+			gebiet.obj.erzlager.num.fossil.current += flow
 		
-		gebiets.back().obj.erzlager.num.abundance.current += rest_ejection
+		gebiets.back().obj.erzlager.num.fossil.current += rest_ejection
 		
 		paint_gebiets()
 
@@ -460,6 +462,11 @@ class Insel:
 				if gebiet.obj.cluster == null:
 					gebiet.flag.on_screen = false
 					gebiet.scene.myself.recolor_by_erzlager()
+					
+					for neighbor in gebiet.dict.neighbor.keys():
+						neighbor.dict.neighbor.erase(gebiet)
+					
+					gebiet.dict.neighbor = {}
 
 
 	func set_cluster_elements() -> void:
@@ -473,6 +480,8 @@ class Insel:
 			
 			for neighbor in cluster.arr.neighbor:
 				elements.erase(neighbor.word.element)
+				if neighbor.word.element != null:
+					elements.erase(Global.dict.element.antipode[neighbor.word.element])
 				
 				if neighbor.word.element == null && !unelemented.has(neighbor):
 					unelemented.append(neighbor)
@@ -523,7 +532,7 @@ class Insel:
 			
 			if options.size() > 0:
 				var cluster = Global.get_random_element(options)
-				var ejection = cluster.obj.center.obj.erzlager.num.abundance.max*3
+				var ejection = cluster.obj.center.obj.erzlager.num.fossil.max*3
 				clusters.erase(cluster)
 				
 				for neighbor in cluster.arr.neighbor:
@@ -539,7 +548,7 @@ class Insel:
 		for element in ejections.keys():
 			ejections[element] = float(ejections[element])/total_ejection
 		
-		print(ejections)
+		#print(ejections)
 
 
 	func get_clusters_around_cluster(cluster_, rings_) -> Array:

@@ -74,6 +74,15 @@ func init_dict() -> void:
 			Vector2( 0,-1)
 		]
 	]
+	dict.element = {}
+	dict.element.antipode = {
+		"Aqua": "Fire",
+		"Wind": "Earth",
+		"Fire": "Aqua",
+		"Earth": "Wind",
+		"Halo": "Dark",
+		"Dark": "Halo"
+	}
 
 
 func init_arr() -> void:
@@ -84,7 +93,7 @@ func init_arr() -> void:
 	arr.sequence["A001358"] = [4, 6, 9, 10, 14, 15, 21, 22, 25, 26]
 	arr.sequence["B000000"] = [2, 3, 5, 8, 10, 13, 17, 20, 24, 29, 33, 38]
 	arr.color = ["Red","Green","Blue","Yellow"]
-	arr.element = ["Aqua","Wind","Fire","Earth"]
+	arr.element = ["Aqua","Wind","Fire","Earth","Halo","Dark"]
 	
 	arr.neighbor = [
 		[

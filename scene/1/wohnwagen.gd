@@ -2,6 +2,7 @@ extends Polygon2D
 
 
 var parent = null
+var tween = null
 
 
 func set_parent(parent_) -> void:
@@ -31,43 +32,52 @@ func recolor() -> void:
 
 
 func update_position() -> void:
-	var vector = parent.obj.gabiet.current.vec.center
+	var vector = parent.obj.gebiet.current.vec.center
 	set_position(vector)
+
+
+func use_radar() -> void:
+	var time = 0.5
+	tween = create_tween()
+	tween.tween_property(self, "skew", PI, time/2)
+	tween.tween_property(self, "skew", 0, time/2)
+	tween.tween_callback(parent.follow_schedule)
 
 
 func move_to_next_gebiet() -> void:
 	parent.flag.moving = true
-	parent.obj.gabiet.current.obj.wohnwagen = null
-	parent.obj.gabiet.next.obj.wohnwagen = parent
-	var tween = create_tween()
-	var distance = parent.obj.gabiet.current.num.w+parent.obj.gabiet.next.num.w
+	parent.obj.gebiet.current.obj.wohnwagen = null
+	parent.obj.gebiet.next.obj.wohnwagen = parent
+	parent.obj.gebiet.previous = parent.obj.gebiet.current
+	
+	var distance = parent.obj.gebiet.current.num.w+parent.obj.gebiet.next.num.w
 	var time = float(distance)/parent.num.speed
-	
-	#for neighbor in parent.obj.gabiet.current.dict.neighbor.keys():
-	#	if neighbor == parent.obj.gabiet.next:
-	#		var direction = parent.obj.gabiet.current.dict.neighbor[neighbor]
-	#		direction *= distance
-	#		direction += parent.obj.gabiet.current.vec.center
-	var direction = parent.obj.gabiet.next.vec.center
+	var direction = parent.obj.gebiet.next.vec.center
+	tween = create_tween()
 	tween.tween_property(self, "position", direction, time)
-	$Moving.wait_time = time/2
-	$Moving.start()
-	return
+	parent.obj.gebiet.current = null
+	tween.tween_callback(parent.parking)
 
 
+func use_scan() -> void:
+	var time = 0.5
+	tween = create_tween()
+	tween.tween_property(self, "rotation", PI/2, time)
+	tween.tween_callback(parent.follow_schedule)
 
-func _on_moving_timeout():
-	if parent.flag.moving && position:# != parent.obj.gabiet.next.vec.center:
-		parent.obj.gabiet.previous = parent.obj.gabiet.current
-		parent.obj.gabiet.current = null
-		parent.flag.moving = false
-		$Moving.start()
-	
-	var parking_distance = 1
-	var distance = position.distance_to(parent.obj.gabiet.next.vec.center)
-	
-	if parking_distance > distance:
-		parent.obj.gabiet.current = parent.obj.gabiet.next
-		parent.obj.gabiet.next = null
-		$Moving.stop()
-		#$Moving.start()
+
+func use_drill() -> void:
+	parent.obj.trailer.chipping_away_at_nugget(parent.obj.gebiet.current.obj.erzlager)
+	var time = 0.1
+	tween = create_tween()
+	tween.tween_property(self, "rotation", -PI/60, time).as_relative()
+	tween.tween_callback(parent.follow_schedule)
+
+
+func end_drill() -> void:
+	var time = 0
+	tween = create_tween()
+	tween.tween_property(self, "rotation", 0, time)
+	tween.tween_callback(parent.follow_schedule)
+	tween.tween_callback(parent.drilling_gebiet_selection)
+
