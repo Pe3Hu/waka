@@ -11,6 +11,166 @@ class Wagen:
 		obj.zunft = input_.zunft
 
 
+#Летопись
+class Chronik:
+	var obj = {}
+	var arr = {}
+	var dict = {}
+
+
+	func _init(input_) -> void:
+		obj.archivar = input_.archivar
+		init_runes()
+		init_parameters()
+
+
+	func init_runes() -> void:
+		arr.rune = {}
+		#total runes
+		arr.rune.archive = []
+		#current runes
+		arr.rune.thought = []
+		#future runes
+		arr.rune.insight = []
+		#previous runes
+		arr.rune.memoir = []
+		#exiled runes
+		arr.rune.forgotten = []
+
+
+	func init_parameters() -> void:
+		dict.parameter = {}
+		
+		for parameter in Global.dict.lied.parameter:
+			if parameter != "servants":
+				dict.parameter[parameter] = {}
+
+
+	func fill_thought() -> void:
+		if arr.rune.insight.size() == 0:
+			arr.rune.archive.shuffle()
+			fill_insight()
+		
+		var space_left = obj.archivar.num.memory-arr.rune.thought.size()
+		var novelty = min(space_left, obj.archivar.num.intellect)
+		
+		for _i in novelty:
+			var rune = arr.rune.insight.pop_front()
+			arr.rune.thought.append(rune)
+		
+		fill_insight()
+		highlight_ehroniks()
+
+
+	func fill_insight() -> void:
+		while obj.archivar.num.intellect > arr.rune.insight.size():
+			pull_rune_from_archive()
+
+
+	func pull_rune_from_archive() -> void:
+		if arr.rune.archive.size() == 0:
+			arr.rune.archive.append_array(arr.rune.memoir)
+			arr.rune.memoir = []
+		
+		arr.rune.archive.shuffle()
+		var rune = arr.rune.archive.pop_front()
+		arr.rune.insight.append(rune)
+
+
+	func highlight_ehroniks() -> void:
+		arr.ehronik = []
+		fill_parameters()
+		check_masters()
+		check_purebloods()
+		check_hierarchys()
+
+
+	func fill_parameters() -> void:
+		init_parameters()
+		var powers = []
+		
+		for rune in arr.rune.thought:
+			if dict.parameter["masters"].keys().has(rune.num.power):
+				dict.parameter["masters"][rune.num.power].append(rune)
+			else:
+				dict.parameter["masters"][rune.num.power] = [rune]
+				powers.append(rune.num.power)
+			
+			if dict.parameter["pureblood"].keys().has(rune.word.abbreviation):
+				dict.parameter["pureblood"][rune.word.abbreviation].append(rune)
+			else:
+				dict.parameter["pureblood"][rune.word.abbreviation] = [rune]
+		
+		powers.sort()
+		
+		for _i in powers.size():
+			var power = powers[_i]
+			dict.parameter["hierarchy"][power] = [power]
+			
+			for _j in range(_i,powers.size()):
+				if powers[_j] == dict.parameter["hierarchy"][power].back()+1:
+					dict.parameter["hierarchy"][power].append(powers[_j])
+		
+		for parameter in dict.parameter.keys():
+			for _i in range(dict.parameter[parameter].keys().size()-1,-1,-1):
+				var key = dict.parameter[parameter].keys()[_i]
+				
+				if dict.parameter[parameter][key].size() < Global.num.lied.min_size[parameter]:
+					dict.parameter[parameter].erase(key)
+
+
+	func check_masters() -> void:
+		
+		var input = {}
+		input.chronik = self
+		input.lied = null
+		var ehronik = Classes_2.Entwurf.new(input)
+		arr.ehronik.append(ehronik)
+
+
+	func check_purebloods() -> void:
+		pass
+
+
+	func check_hierarchys() -> void:
+		pass
+
+
+#Архивариус
+class Archivar:
+	var num = {}
+	var obj = {}
+
+
+	func _init(input_) -> void:
+		num.intellect = 7
+		num.memory = 10
+		obj.wohnwagen = input_.wohnwagen
+		init_chronik()
+		set_standard_content_of_chronik()
+		
+		obj.chronik.fill_thought()
+		
+		for rune in obj.chronik.arr.rune.thought:
+			print(rune.word.abbreviation,rune.num.power)
+
+
+	func init_chronik() -> void:
+		var input = {}
+		input.archivar = self
+		obj.chronik = Classes_1.Chronik.new(input)
+
+
+	func set_standard_content_of_chronik() -> void:
+		for alphabet in Global.obj.lexikon.arr.alphabet:
+			for rune in alphabet.arr.rune:
+				add_rune_to_chronik(rune)
+
+
+	func add_rune_to_chronik(rune_) -> void:
+		obj.chronik.arr.rune.archive.append(rune_)
+ 
+
 #Прицеп
 class Trailer:
 	var num = {}
@@ -93,6 +253,7 @@ class Wohnwagen:
 		obj.cluster.destination = null
 		init_scene()
 		init_trailer()
+		init_archivar()
 		arr.schedule.append("echo sounding")
 
 
@@ -106,6 +267,12 @@ class Wohnwagen:
 		var input = {}
 		input.wohnwagen = self
 		obj.trailer = Classes_1.Trailer.new(input)
+
+
+	func init_archivar() -> void:
+		var input = {}
+		input.wohnwagen = self
+		obj.archivar = Classes_1.Archivar.new(input)
 
 
 	func add_wagen(wagen_) -> void:
@@ -275,6 +442,7 @@ class Wohnwagen:
 			obj.gebiet.current.scene.myself.recolor_by_erzlager()
 		else:
 			scene.myself.end_drill()
+
 
 #Гильдия
 class Zunft:

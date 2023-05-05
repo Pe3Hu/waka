@@ -28,6 +28,12 @@ func init_num() -> void:
 	num.meilenstein.n = num.insel.rings*2-1
 	num.meilenstein.rows = 4+(num.meilenstein.n-1)*2
 	num.meilenstein.cols = 1+num.meilenstein.n
+	
+	num.lied = {}
+	num.lied.min_size = {}
+	num.lied.min_size.masters = 1
+	num.lied.min_size.hierarchy = 3
+	num.lied.min_size.pureblood = 3
 
 
 func init_dict() -> void:
@@ -83,15 +89,63 @@ func init_dict() -> void:
 		"Halo": "Dark",
 		"Dark": "Halo"
 	}
+	
+	init_sin()
+	init_lied()
+
+
+func init_sin() -> void:
+	dict.alphabet = {}
+	var path = "res://asset/json/alphabet_data.json"
+	var array = load_data(path)
+	dict.alphabet.sin = {}
+	dict.alphabet.parameter = []
+	
+	for alphabet in array:
+		var data = {}
+
+		for key in alphabet.keys():
+			if key != "sin" && alphabet[key] > 0:
+				data[key] = alphabet[key]
+				
+				if !dict.alphabet.parameter.has(key):
+					dict.alphabet.parameter.append(key)
+		
+		dict.alphabet.sin[alphabet["sin"]] = data
+
+
+func init_lied() -> void:
+	dict.lied = {}
+	var path = "res://asset/json/lied_data.json"
+	var array = load_data(path)
+	dict.lied.name = {}
+	dict.lied.parameter = {}
+	
+	for lied in array:
+		var data = {}
+
+		for key in lied.keys():
+			if key != "name" && lied[key] > 0:
+				data[key] = lied[key]
+				
+				if !dict.lied.parameter.keys().has(key):
+					dict.lied.parameter[key] = {}
+		
+		dict.lied.name[lied["name"]] = data
+		
+	
+	for key in dict.lied.name.keys():
+		var lied = dict.lied.name[key]
+		
+		for parameter in lied.keys():
+			if dict.lied.parameter[parameter].has(lied[parameter]):
+				dict.lied.parameter[parameter][lied[parameter]].append(key)
+			else:
+				dict.lied.parameter[parameter][lied[parameter]] = [key]
+	
 
 
 func init_arr() -> void:
-	arr.sequence = {} 
-	arr.sequence["A000040"] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
-	arr.sequence["A000045"] = [89, 55, 34, 21, 13, 8, 5, 3, 2, 1, 1]
-	arr.sequence["A000124"] = [7, 11, 16] #, 22, 29, 37, 46, 56, 67, 79, 92, 106, 121, 137, 154, 172, 191, 211]
-	arr.sequence["A001358"] = [4, 6, 9, 10, 14, 15, 21, 22, 25, 26]
-	arr.sequence["B000000"] = [2, 3, 5, 8, 10, 13, 17, 20, 24, 29, 33, 38]
 	arr.color = ["Red","Green","Blue","Yellow"]
 	arr.element = ["Aqua","Wind","Fire","Earth","Halo","Dark"]
 	
