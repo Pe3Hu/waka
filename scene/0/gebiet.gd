@@ -43,3 +43,8 @@ func recolor_by_erzlager() -> void:
 		
 		parent.color.background = Color.from_hsv(h,s,v)
 		set_color(parent.color.background)
+
+
+func paint_black() -> void:
+	parent.color.background = Color("black")
+	set_color(parent.color.background)

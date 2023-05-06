@@ -88,6 +88,7 @@ class Cluster:
 		word.element = null
 		arr.gebiet = input_.gebiets
 		arr.neighbor = []
+		arr.developed = []
 		obj.center = input_.center
 		obj.insel = input_.insel
 		flag.on_screen = true
@@ -115,6 +116,11 @@ class Cluster:
 		for gebiet in arr.gebiet:
 			gebiet.flag.on_screen = false
 			gebiet.scene.myself.recolor_by_erzlager()
+			
+			for neighbor in gebiet.dict.neighbor.keys():
+				neighbor.dict.neighbor.erase(gebiet)
+			
+			gebiet.dict.neighbor = {}
 		
 		obj.insel.arr.cluster.erase(self)
 
@@ -167,6 +173,28 @@ class Cluster:
 		gebiets.back().obj.erzlager.num.fossil.current += rest_ejection
 		
 		paint_gebiets()
+
+
+	func update_developeds() -> void:
+		var percent = 10
+		
+		for gebiet in arr.gebiet:
+			if gebiet.obj.erzlager.num.fossil.current*100/gebiet.obj.erzlager.num.fossil.max < percent:
+				add_developed(gebiet)
+
+
+	func add_developed(gebiet_) -> void:
+		if !arr.developed.has(gebiet_):
+			arr.developed.append(gebiet_)
+
+
+	func check_eruption() -> void:
+		if flag.eruption and arr.developed.size() == arr.gebiet.size():
+			arr.developed = []
+			flag.eruption = false
+			
+			for gebiet in arr.gebiet:
+				gebiet.scene.myself.paint_black()
 
 
 #Остров
@@ -540,6 +568,7 @@ class Insel:
 				
 				cluster.flag.eruption = true
 				cluster.rng_spill(ejection)
+				cluster.update_developeds()
 				ejections[cluster.word.element] += ejection
 				total_ejection += ejection
 			else:

@@ -208,7 +208,7 @@ class Archivar:
 		init_chronik()
 		set_standard_content_of_chronik()
 		
-		obj.chronik.fill_thought()
+		#obj.chronik.fill_thought()
 		
 		#for rune in obj.chronik.arr.rune.thought:
 		#	print(rune.word.abbreviation,rune.num.power)
@@ -269,7 +269,7 @@ class Trailer:
 				fiasco[false] = 1.0
 				fiasco[true] = 0.0
 		
-		print("nugget_size: ", nugget)
+		#print("nugget_size: ", nugget)
 		erzlager_.num.fossil.current -= nugget
 		add_nugget(nugget)
 
@@ -285,6 +285,7 @@ class Trailer:
 #Караван
 class Wohnwagen:
 	var num = {}
+	var word = {}
 	var vec = {}
 	var obj = {}
 	var arr = {}
@@ -294,8 +295,13 @@ class Wohnwagen:
 
 
 	func _init(input_) -> void:
+		word.action = {}
+		word.action.previous = ""
 		num.speed = 300
 		num.drill = 100
+		num.radar = {}
+		num.radar.basic = 3
+		num.radar.current = num.radar.basic
 		vec.grid = null
 		obj.zunft = input_.zunft
 		num.size = input_.size
@@ -303,6 +309,7 @@ class Wohnwagen:
 		arr.wagen = []
 		arr.schedule = []
 		arr.erzlager = []
+		arr.log = []
 		obj.gebiet = {}
 		obj.gebiet.previous = null
 		obj.gebiet.current = null
@@ -348,7 +355,6 @@ class Wohnwagen:
 	func follow_schedule() -> void:
 		if  arr.schedule.size() > 0:
 			var action = arr.schedule.pop_front()
-			print(action)
 			
 			match action:
 				"echo sounding":
@@ -357,13 +363,23 @@ class Wohnwagen:
 					get_closer_to_destination()
 				"scanning":
 					assess_near_gebiets()
+				"drill manvering":
 					drilling_gebiet_selection()
 				"drilling":
 					drill()
+			
+			arr.log.append(action)
+			
+			if arr.log.size() > 10:
+				arr.log.pop_front()
 
 
 	func radar() -> void:
-		var rings = 3
+		if obj.gebiet.current == null:
+			print("radar obj.gebiet.current error")
+			return
+		
+		var rings = num.radar.current
 		var arounds = Global.obj.insel.get_clusters_around_cluster(obj.gebiet.current.obj.cluster, rings)
 		arounds.pop_front()
 		var datas = []
@@ -376,11 +392,20 @@ class Wohnwagen:
 		for _i in arounds.size():
 			for cluster in arounds[_i]:
 				if cluster.flag.eruption and weight_of_curbeds.keys().has(cluster.word.element):
-					var data = {}
-					data.cluster = cluster
-					data.element = cluster.word.element
-					data.ring = _i+1
-					datas.append(data) 
+#					var developeds = []
+#					developeds.append_array(cluster.arr.developed)
+#
+#					for gebiet in cluster.arr.gebiet:
+#						if !developeds.has(gebiet) and gebiet.obj.wohnwagen != null:
+#							developeds.append(gebiet)
+					
+					if cluster.arr.gebiet.size() != cluster.arr.developed.size():
+						var data = {}
+						data.cluster = cluster
+						data.element = cluster.word.element
+						data.ring = _i+1
+						datas.append(data)
+					
 		
 		datas.sort_custom(func(a, b): return a.ring < b.ring)
 		
@@ -391,41 +416,98 @@ class Wohnwagen:
 				options[data.cluster] = weight_of_curbeds[data.element]
 		
 		if options.keys().size() == 0:
-			for neighbor in obj.gebiet.current.obj.cluster.arr.neighbor:
-				options[neighbor] = 1
-		
-		obj.cluster.destination = Global.get_random_key(options)
-		obj.gebiet.destination = null
-		arr.schedule.append("moving")
-		scene.myself.use_radar()
+			#for neighbor in obj.gebiet.current.obj.cluster.arr.neighbor:
+			#	options[neighbor] = 1
+			num.radar.current += 1
+			arr.schedule.append("echo sounding")
+			scene.myself.use_radar()
+		else:
+			num.radar.current = num.radar.basic
+			obj.cluster.destination = Global.get_random_key(options)
+			obj.gebiet.destination = null
+			arr.schedule.append("moving")
+			scene.myself.use_radar()
 
 
 	func get_closer_to_destination() -> void:
 		if obj.gebiet.current != null and (obj.cluster.destination != null or obj.gebiet.destination != null):
 			var main_direction = Vector2()
+			var destination = null
 			
 			if obj.cluster.destination != null:
-				main_direction = obj.cluster.destination.obj.center.vec.grid
+				destination = obj.cluster.destination.obj.center
 			
 			if obj.gebiet.destination != null:
-				main_direction = obj.gebiet.destination.vec.grid
+				destination = obj.gebiet.destination
+				
+			if destination != null:
+				#if destination.obj.wohnwagen != null:
+				var surrounded = true
+				
+				for neighbor in destination.dict.neighbor.keys():
+					if neighbor.obj.wohnwagen == null:
+						var access = false
+						
+						for neighbor_ in neighbor.dict.neighbor.keys():
+							if neighbor_.obj.wohnwagen == null:
+								access = true
+						
+						if access:
+							surrounded = false
+							break
+					break
+				
+				if surrounded:
+					arr.schedule.append("echo sounding")
+					follow_schedule()
+					return
+				else:
+					if destination.obj.wohnwagen != null:
+						arr.schedule.append("drill manvering")
+						follow_schedule()
+						return
 			
-			main_direction -= obj.gebiet.current.vec.grid
+			main_direction = destination.vec.grid-obj.gebiet.current.vec.grid
 			
 			var main_distance = abs(main_direction.x)+abs(main_direction.y)
 			
 			if main_distance > 0:
 				var options = {}
+				var distance = {}
+				distance.max = 0
+				distance.min = Global.num.insel.a*Global.num.meilenstein.rows*Global.num.meilenstein.cols
+				var optimal = false
 				
 				for neighbor in obj.gebiet.current.dict.neighbor.keys():
-					var neighbor_direction = obj.gebiet.current.dict.neighbor[neighbor]
-					var neighbor_distance = abs(neighbor_direction.x-main_direction.x)+abs(neighbor_direction.y-main_direction.y)
-					
-					if neighbor_distance < main_distance:
+					if neighbor.obj.wohnwagen == null:
+						var neighbor_direction = obj.gebiet.current.dict.neighbor[neighbor]
+						var neighbor_distance = abs(neighbor_direction.x-main_direction.x)+abs(neighbor_direction.y-main_direction.y)
+						
+						if neighbor_distance < main_distance:
+							optimal = true
+						
 						options[neighbor] = main_distance-neighbor_distance
-					
-				obj.gebiet.next = Global.get_random_key(options)
-				scene.myself.move_to_next_gebiet()
+						
+						if distance.max < neighbor_distance:
+							distance.max = neighbor_distance
+						
+						if distance.min > neighbor_distance:
+							distance.min = neighbor_distance
+				
+				
+				for neighbor in options.keys():
+					if optimal:
+						if options[neighbor] < 0:
+							options.erase(neighbor)
+					else:
+						options[neighbor] = pow((distance.max-options[neighbor]),2)
+				
+				
+				if options.size() == 0:
+					scene.myself.wait("moving")
+				else:
+					obj.gebiet.next = Global.get_random_key(options)
+					scene.myself.move_to_next_gebiet()
 			else:
 				#print("Wtf shedule")
 				obj.gebiet.next = obj.gebiet.current
@@ -445,6 +527,8 @@ class Wohnwagen:
 		if obj.gebiet.destination != null:
 			if obj.gebiet.current == obj.gebiet.destination:
 				obj.gebiet.destination = null
+				obj.gebiet.current.obj.cluster.add_developed(obj.gebiet.current)
+				obj.gebiet.current.obj.cluster.check_eruption()
 				arr.schedule.append("drilling")
 		
 		if obj.cluster.destination != null or obj.gebiet.destination != null:
@@ -458,13 +542,19 @@ class Wohnwagen:
 			if !gebiet.obj.erzlager.arr.access.has(self):
 				gebiet.obj.erzlager.arr.access.append(self)
 				arr.erzlager.append(gebiet.obj.erzlager)
+		
+		arr.schedule.append("drill manvering")
+		follow_schedule()
 
 
 	func drilling_gebiet_selection() -> void:
+		if obj.gebiet.current == null:
+			print("error in drilling_gebiet_selection obj.gebiet.current")
+			return
 		var options = {}
 		
 		for erzlager in arr.erzlager:
-			if erzlager.obj.gebiet.obj.cluster == obj.gebiet.current.obj.cluster:
+			if erzlager.obj.gebiet.obj.cluster == obj.gebiet.current.obj.cluster and erzlager.obj.gebiet.obj.wohnwagen == null:
 				var weight = max(erzlager.num.fossil.current-num.drill,0)
 				var distance = 2
 				
@@ -484,6 +574,8 @@ class Wohnwagen:
 			
 			if obj.gebiet.destination == obj.gebiet.current:
 				arr.schedule.append("drilling")
+				obj.gebiet.current.obj.cluster.add_developed(obj.gebiet.current)
+				obj.gebiet.current.obj.cluster.check_eruption()
 				obj.gebiet.destination = null
 			else:
 				arr.schedule.append("moving")
@@ -507,9 +599,11 @@ class Wohnwagen:
 class Zunft:
 	var word = {}
 	var arr = {}
+	var obj = {}
 
 
 	func _init(input_) -> void:
+		obj.gewerkschaft = null
 		word.title = input_.title
 		init_wohnwagens()
 		init_wagens()
@@ -557,3 +651,45 @@ class Zunft:
 		
 		var cluster = Global.get_random_element(clusters)
 		wohnwagen.set_gebiet(cluster.obj.center) 
+
+
+#Армия
+class Heer:
+	var word = {}
+	var arr = {}
+	var obj = {}
+
+
+	func _init() -> void:
+		init_zunfts()
+		spread_zunfts()
+
+
+	func init_zunfts() -> void:
+		arr.zunft = []
+		var n = 30
+		
+		for _i in n:
+			var input = {}
+			input.zunft = self
+			input.title = str(_i)
+			var zunft = Classes_1.Zunft.new(input)
+			arr.zunft.append(zunft)
+
+
+	func spread_zunfts() -> void:
+		var zunfts = []
+		var gewerkschafts = []
+		zunfts.append_array(arr.zunft)
+		gewerkschafts.append_array(Global.obj.handel.arr.gewerkschaft)
+		zunfts.shuffle()
+		gewerkschafts.shuffle()
+		
+		while zunfts.size() > 0:
+			var zunft = zunfts.pop_front()
+			var gewerkschaft = gewerkschafts.pop_front()
+			gewerkschaft.bring_privateer(zunft)
+			
+			if gewerkschafts.size() == 0:
+				gewerkschafts.append_array(Global.obj.handel.arr.gewerkschaft)
+				gewerkschafts.shuffle()

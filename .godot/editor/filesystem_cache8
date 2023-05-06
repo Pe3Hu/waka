@@ -1,5 +1,5 @@
 2a60927148abd1d33b818b535e306557
-::res://::1683300426
+::res://::1683397069
 icon.png::CompressedTexture2D::2432420761471245026::1676094585::1682073341::1::::<><>::
 icon.svg::CompressedTexture2D::9162371498834860976::1679058444::1682073341::1::::<><>::
 README.md::TextFile::-1::1683151518::0::1::::<><>::
@@ -20,7 +20,9 @@ neuropolitical rg.otf::FontFile::2325526762121942984::1336566082::1682151714::1:
 rimouski sb.otf::FontFile::2683584631797712805::1657615528::1682151714::1::::<><>::
 Sabandija-font-ffp.ttf::FontFile::9201959610161765482::1673874020::1682073340::1::::<><>::
 vinque rg.otf::FontFile::4667643456426473135::1570966408::1682151714::1::::<><>::
-::res://asset/json/::1683032814
+::res://asset/json/::1683317306
+alphabet_data.json::JSON::-1::1683304531::0::1::::<><>::
+lied_data.json::JSON::-1::1683317297::0::1::::<><>::
 ::res://asset/png/::1683036000
 circle_black_16.png::CompressedTexture2D::8621509779724911139::1679229887::1682073341::1::::<><>::
 ::res://asset/png/sektor/::1683035145
@@ -29,17 +31,18 @@ filled.png::CompressedTexture2D::8616010504473682836::1682149973::1682150005::1:
 ::res://asset/tileset/::1683033447
 hex.tres::MeshLibrary::4853583784148232087::1683033447::0::1::::<><>::
 ::res://scene/::1683036869
-::res://scene/0/::1683228731
+::res://scene/0/::1683397124
 gebiet.gd::GDScript::-1::1683223960::0::1::::<>Polygon2D<>::
-gebiet.tscn::PackedScene::4831893436203397870::1683228731::0::1::::<><>::res://scene/0/gebiet.gd
+gebiet.tscn::PackedScene::4831893436203397870::1683397124::0::1::::<><>::res://scene/0/gebiet.gd
 insel.tscn::PackedScene::5124351785616124605::1683038424::0::1::::<><>::
-::res://scene/1/::1683228731
+::res://scene/1/::1683397124
 wohnwagen.gd::GDScript::-1::1683228463::0::1::::<>Polygon2D<>::
-wohnwagen.tscn::PackedScene::6096750797907995586::1683228731::0::1::::<><>::res://scene/1/wohnwagen.gd
-::res://scene/game/::1683228731
-Game.gd::GDScript::-1::1683221759::0::1::::<>Node<>::
-Game.tscn::PackedScene::8246655032211948728::1683228731::0::1::::<><>::res://scene/game/Game.gd
-::res://script/::1683228731
+wohnwagen.tscn::PackedScene::6096750797907995586::1683397124::0::1::::<><>::res://scene/1/wohnwagen.gd
+::res://scene/game/::1683397124
+Game.gd::GDScript::-1::1683319460::0::1::::<>Node<>::
+Game.tscn::PackedScene::8246655032211948728::1683397124::0::1::::<><>::res://scene/game/Game.gd
+::res://script/::1683332338
 Classes_0.gd::GDScript::-1::1683223953::0::1::::<>Node<>::
-Classes_1.gd::GDScript::-1::1683228731::0::1::::<>Node<>::
-Global.gd::GDScript::-1::1683152396::0::1::::<>Node<>::
+Classes_1.gd::GDScript::-1::1683332338::0::1::::<>Node<>::
+Classes_2.gd::GDScript::-1::1683332316::0::1::::<>Node<>::
+Global.gd::GDScript::-1::1683330829::0::1::::<>Node<>::

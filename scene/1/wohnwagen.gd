@@ -1,4 +1,4 @@
-extends Polygon2D
+extends Node2D
 
 
 var parent = null
@@ -7,6 +7,10 @@ var tween = null
 
 func set_parent(parent_) -> void:
 	parent = parent_
+	init_vertexs()
+
+
+func init_vertexs() -> void:
 	var vertexs = []
 	var a = Global.num.insel.w/2
 	
@@ -14,7 +18,22 @@ func set_parent(parent_) -> void:
 		var vertex = neighbor*a
 		vertexs.append(vertex)
 	
-	set_polygon(vertexs)
+	$Background.set_polygon(vertexs)
+	
+	vertexs = []
+	a = Global.num.insel.w/4
+	
+	for neighbor in Global.dict.neighbor.linear2:
+		var vertex = neighbor*a
+		vertexs.append(vertex)
+	
+	$Emblem.set_polygon(vertexs)
+	
+	var h = 0.75
+	var s = 0.75
+	var v = 0
+	parent.color.background = Color.from_hsv(h,s,v)
+	$Background.set_color(parent.color.background)
 	recolor()
 
 
@@ -23,12 +42,19 @@ func recolor() -> void:
 	var s = 0.75
 	var v = 1
 	
-	match parent.obj.zunft.word.title:
-		"First":
-			v = 0.0
+	if parent.obj.zunft.obj.gewerkschaft != null:
+		match parent.obj.zunft.obj.gewerkschaft.word.title:
+			"1":
+				h = 120.0/360
+			"2":
+				h = 200.0/360
+			"3":
+				h = 320.0/360
+	else:
+		s = 0
 	
-	parent.color.background = Color.from_hsv(h,s,v)
-	set_color(parent.color.background)
+	parent.color.emblem = Color.from_hsv(h,s,v)
+	$Emblem.set_color(parent.color.emblem)
 
 
 func update_position() -> void:
@@ -80,4 +106,15 @@ func end_drill() -> void:
 	tween.tween_property(self, "rotation", 0, time)
 	tween.tween_callback(parent.follow_schedule)
 	tween.tween_callback(parent.drilling_gebiet_selection)
+
+
+func wait(action_) -> void:
+	var time = 1
+	tween = create_tween()
+	tween.tween_property(self, "rotation", 0, time).as_relative()
+	
+	match action_:
+		"moving":
+			tween.tween_callback(parent.get_closer_to_destination)
+	
 
