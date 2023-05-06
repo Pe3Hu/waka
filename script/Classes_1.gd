@@ -20,6 +20,7 @@ class Chronik:
 
 	func _init(input_) -> void:
 		obj.archivar = input_.archivar
+		dict.ethnography = {}
 		init_runes()
 		init_parameters()
 
@@ -39,11 +40,11 @@ class Chronik:
 
 
 	func init_parameters() -> void:
-		dict.parameter = {}
+		dict.ethnography = {}
 		
 		for parameter in Global.dict.lied.parameter:
 			if parameter != "servants":
-				dict.parameter[parameter] = {}
+				dict.ethnography[parameter] = {}
 
 
 	func fill_thought() -> void:
@@ -79,10 +80,11 @@ class Chronik:
 
 	func highlight_ehroniks() -> void:
 		arr.ehronik = []
-		fill_parameters()
-		check_masters()
-		check_purebloods()
-		check_hierarchys()
+		Global.fill_ethnography_parameters(self, arr.rune.thought)
+		var ehronik_runes = []
+		masters_and_pureblood_repositioning(ehronik_runes)
+		hierarchy_repositioning(ehronik_runes)
+		fill_ehroniks(ehronik_runes)
 
 
 	func fill_parameters() -> void:
@@ -90,50 +92,107 @@ class Chronik:
 		var powers = []
 		
 		for rune in arr.rune.thought:
-			if dict.parameter["masters"].keys().has(rune.num.power):
-				dict.parameter["masters"][rune.num.power].append(rune)
+			if dict.ethnography["masters"].keys().has(rune.num.power):
+				dict.ethnography["masters"][rune.num.power].append(rune)
 			else:
-				dict.parameter["masters"][rune.num.power] = [rune]
+				dict.ethnography["masters"][rune.num.power] = [rune]
 				powers.append(rune.num.power)
 			
-			if dict.parameter["pureblood"].keys().has(rune.word.abbreviation):
-				dict.parameter["pureblood"][rune.word.abbreviation].append(rune)
+			if dict.ethnography["pureblood"].keys().has(rune.word.abbreviation):
+				dict.ethnography["pureblood"][rune.word.abbreviation].append(rune)
 			else:
-				dict.parameter["pureblood"][rune.word.abbreviation] = [rune]
+				dict.ethnography["pureblood"][rune.word.abbreviation] = [rune]
 		
 		powers.sort()
 		
-		for _i in powers.size():
-			var power = powers[_i]
-			dict.parameter["hierarchy"][power] = [power]
+		while powers.size() > 0:
+			var power = powers.pop_front()
+			dict.ethnography["hierarchy"][power] = [power]
 			
-			for _j in range(_i,powers.size()):
-				if powers[_j] == dict.parameter["hierarchy"][power].back()+1:
-					dict.parameter["hierarchy"][power].append(powers[_j])
-		
-		for parameter in dict.parameter.keys():
-			for _i in range(dict.parameter[parameter].keys().size()-1,-1,-1):
-				var key = dict.parameter[parameter].keys()[_i]
+			if powers.size() > 0:
+				var next_power = powers.pop_front()
 				
-				if dict.parameter[parameter][key].size() < Global.num.lied.min_size[parameter]:
-					dict.parameter[parameter].erase(key)
-
-
-	func check_masters() -> void:
+				while next_power == dict.ethnography["hierarchy"][power].back()+1:
+					dict.ethnography["hierarchy"][power].append(next_power)
+					next_power = powers.pop_front()
+					
+				powers.push_front(next_power)
 		
-		var input = {}
-		input.chronik = self
-		input.lied = null
-		var ehronik = Classes_2.Entwurf.new(input)
-		arr.ehronik.append(ehronik)
+		for parameter in dict.ethnography.keys():
+			for _i in range(dict.ethnography[parameter].keys().size()-1,-1,-1):
+				var key = dict.ethnography[parameter].keys()[_i]
+				
+				if dict.ethnography[parameter][key].size() < Global.num.lied.min_size[parameter]:
+					dict.ethnography[parameter].erase(key)
 
 
-	func check_purebloods() -> void:
-		pass
+	func masters_and_pureblood_repositioning(ehronik_runes_: Array) -> void:
+		var parameters = ["masters","pureblood"]
+		
+		for parameter in parameters:
+			for power in dict.ethnography[parameter].keys():
+				var subpart_sizes = []
+				
+				for size in range(Global.num.lied.min_size[parameter],dict.ethnography[parameter][power].size()+1,1):
+					subpart_sizes.append(size)
+				
+				var subparts = Global.get_all_subparts(dict.ethnography[parameter][power], subpart_sizes, parameter)
+				
+				for size in subparts.keys():
+					for runes in subparts[size]:
+						if !ehronik_runes_.has(runes):
+							ehronik_runes_.append(runes)
 
 
-	func check_hierarchys() -> void:
-		pass
+	func hierarchy_repositioning(ehronik_runes_) -> void:
+		var parameter = "hierarchy"
+		var powers = []
+		
+		for begin in dict.ethnography[parameter].keys():
+			var runes = []
+			var subpart_sizes = []
+			
+			for size in range(Global.num.lied.min_size[parameter],dict.ethnography[parameter][begin].size()+1,1):
+				subpart_sizes.append(size)
+			
+			var subparts = Global.get_all_subparts(dict.ethnography[parameter][begin], subpart_sizes, parameter)
+			
+			for size in subparts.keys():
+				for _i in range(subparts[size].size()-1,-1,-1):
+					var hierarchy = true
+					var subpart = subparts[size][_i]
+			
+					for _j in range(0,subpart.size()-1):
+						if subpart[_j]+1 != subpart[_j+1]:
+							hierarchy = false
+							break
+					
+					if hierarchy && !powers.has(subpart):
+						#subparts[size].erase(subpart)
+						powers.append(subpart)
+		
+		
+		for powers_ in powers:
+			var options = []
+			for power in powers_:
+				options.append(dict.ethnography["masters"][power]) 
+				
+			var substitutions = Global.get_all_substitution(options)
+			
+			for runes in substitutions:
+				runes.sort_custom(func(a, b): return a.num.index > b.num.index)
+				
+				if !ehronik_runes_.has(runes):
+					ehronik_runes_.append(runes)
+
+
+	func fill_ehroniks(ehronik_runes_) -> void:
+		for runes in ehronik_runes_:
+			var input = {}
+			input.chronik = self
+			input.runes = runes
+			var ehronik = Classes_2.Entwurf.new(input)
+			arr.ehronik.append(ehronik)
 
 
 #Архивариус
@@ -143,7 +202,7 @@ class Archivar:
 
 
 	func _init(input_) -> void:
-		num.intellect = 7
+		num.intellect = 10
 		num.memory = 10
 		obj.wohnwagen = input_.wohnwagen
 		init_chronik()
@@ -151,8 +210,8 @@ class Archivar:
 		
 		obj.chronik.fill_thought()
 		
-		for rune in obj.chronik.arr.rune.thought:
-			print(rune.word.abbreviation,rune.num.power)
+		#for rune in obj.chronik.arr.rune.thought:
+		#	print(rune.word.abbreviation,rune.num.power)
 
 
 	func init_chronik() -> void:

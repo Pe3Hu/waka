@@ -14,6 +14,7 @@ var scene = {}
 
 func init_num() -> void:
 	num.index = {}
+	num.index.rune = 0
 	
 	num.insel = {}
 	num.insel.rings = 25
@@ -138,10 +139,12 @@ func init_lied() -> void:
 		var lied = dict.lied.name[key]
 		
 		for parameter in lied.keys():
-			if dict.lied.parameter[parameter].has(lied[parameter]):
-				dict.lied.parameter[parameter][lied[parameter]].append(key)
+			var size = int(lied[parameter])
+			
+			if dict.lied.parameter[parameter].has(size):
+				dict.lied.parameter[parameter][size].append(key)
 			else:
-				dict.lied.parameter[parameter][lied[parameter]] = [key]
+				dict.lied.parameter[parameter][size] = [key]
 	
 
 
@@ -226,14 +229,14 @@ func _ready() -> void:
 	init_vec()
 
 
-func get_random_element(arr_: Array):
-	if arr_.size() == 0:
+func get_random_element(array_: Array):
+	if array_.size() == 0:
 		print("!bug! empty array in get_random_element func")
 		return null
 	
 	rng.randomize()
-	var index_r = rng.randi_range(0, arr_.size()-1)
-	return arr_[index_r]
+	var index_r = rng.randi_range(0, array_.size()-1)
+	return array_[index_r]
 
 
 func split_two_point(points_: Array, delta_: float):
@@ -323,5 +326,141 @@ func from_weight_to_percentage(dict_: Dictionary) -> Dictionary:
 	
 	for key in dict_.keys():
 		result[key] = round(float(dict_[key])/total*100)
+	
+	return result
+
+
+func fill_ethnography_parameters(obj_, runes_: Array) -> void:
+		obj_.dict.ethnography = {}
+		
+		for parameter in Global.dict.lied.parameter:
+			obj_.dict.ethnography[parameter] = {}
+			
+		var powers = []
+		
+		for rune in runes_:
+			if obj_.dict.ethnography["masters"].keys().has(rune.num.power):
+				obj_.dict.ethnography["masters"][rune.num.power].append(rune)
+			else:
+				obj_.dict.ethnography["masters"][rune.num.power] = [rune]
+				powers.append(rune.num.power)
+			
+			if obj_.dict.ethnography["pureblood"].keys().has(rune.word.abbreviation):
+				obj_.dict.ethnography["pureblood"][rune.word.abbreviation].append(rune)
+			else:
+				obj_.dict.ethnography["pureblood"][rune.word.abbreviation] = [rune]
+		
+		powers.sort()
+		
+		while powers.size() > 0:
+			var power = powers.pop_front()
+			obj_.dict.ethnography["hierarchy"][power] = [power]
+			
+			if powers.size() > 0:
+				var next_power = powers.pop_front()
+				
+				while next_power == obj_.dict.ethnography["hierarchy"][power].back()+1:
+					obj_.dict.ethnography["hierarchy"][power].append(next_power)
+					next_power = powers.pop_front()
+					
+				powers.push_front(next_power)
+		
+		for parameter in obj_.dict.ethnography.keys():
+			for _i in range(obj_.dict.ethnography[parameter].keys().size()-1,-1,-1):
+				var key = obj_.dict.ethnography[parameter].keys()[_i]
+				
+				if obj_.dict.ethnography[parameter][key].size() < Global.num.lied.min_size[parameter]:
+					obj_.dict.ethnography[parameter].erase(key)
+
+
+func get_all_substitution(array_: Array):
+	var result = [[]]
+	
+	for _i in array_.size():
+		var slot_options = array_[_i]
+		var next = []
+		
+		for arr_ in result:
+			for option in slot_options:
+				var pair = []
+				pair.append_array(arr_)
+				pair.append(option)
+				next.append(pair)
+		
+		result = next
+		for _j in range(result.size()-1,-1,-1):
+			if result[_j].size() < _i+1:
+				result.erase(result[_j])
+	
+	return result
+
+
+func get_all_subparts(array_: Array, subpart_sizes_: Array, parametr_: String):
+	var result = {}
+	var perms = get_all_perms(array_)
+	
+	for subpart_size in subpart_sizes_:
+		result[subpart_size] = []
+	
+	for perm in perms:
+		for subpart_size in subpart_sizes_:
+			var subpart = []
+			
+			for _i in subpart_size:
+				subpart.append(perm[_i])
+			
+			match parametr_:
+				"masters":
+					subpart.sort_custom(func(a, b): return a.num.index > b.num.index)
+				"pureblood":
+					subpart.sort_custom(func(a, b): return a.num.index > b.num.index)
+				"hierarchy":
+					subpart.sort()
+			
+			if !result[subpart_size].has(subpart):
+				result[subpart_size].append(subpart)
+	
+	return result
+
+
+func get_all_perms(array_: Array):
+	var result = []
+	perm(result, array_, 0)
+	return result
+
+
+func perm(result_: Array, array_: Array, l_: int):
+	if l_ >= array_.size():
+		var array = []
+		array.append_array(array_)
+		result_.append(array)
+		return
+	
+	perm(result_, array_, l_+1)
+	
+	for _i in range(l_+1,array_.size(),1):
+		swap(array_, l_, _i)
+		perm(result_, array_, l_+1)
+		swap(array_, l_, _i)
+
+
+func swap(array_: Array, i_: int, j_: int):
+	var temp = array_[i_]
+	array_[i_] = array_[j_]
+	array_[j_] = temp
+
+
+func conjunction(n_: int, m_: int) -> int:
+	var result = factorial(n_)
+	result /= factorial(n_ - m_)
+	result /= factorial(m_)
+	return result
+
+
+func factorial(n_: int) -> int:
+	var result = 1
+	
+	for _i in range(2,n_+1,1):
+		result *= _i
 	
 	return result
