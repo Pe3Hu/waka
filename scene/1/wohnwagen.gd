@@ -71,7 +71,10 @@ func use_radar() -> void:
 
 
 func move_to_next_gebiet() -> void:
-	parent.flag.moving = true
+	if parent.obj.gebiet.current == null:
+		print("error move_to_next_gebiet obj.gebiet.current")
+		return
+		
 	parent.obj.gebiet.current.obj.wohnwagen = null
 	parent.obj.gebiet.next.obj.wohnwagen = parent
 	parent.obj.gebiet.previous = parent.obj.gebiet.current
@@ -79,10 +82,10 @@ func move_to_next_gebiet() -> void:
 	var distance = parent.obj.gebiet.current.num.w+parent.obj.gebiet.next.num.w
 	var time = float(distance)/parent.num.speed
 	var direction = parent.obj.gebiet.next.vec.center
+	parent.obj.gebiet.current = null
 	tween = create_tween()
 	tween.tween_property(self, "position", direction, time)
-	parent.obj.gebiet.current = null
-	tween.tween_callback(parent.parking)
+	tween.tween_callback(parent.follow_schedule)
 
 
 func use_scan() -> void:
@@ -100,21 +103,10 @@ func use_drill() -> void:
 	tween.tween_callback(parent.follow_schedule)
 
 
-func end_drill() -> void:
-	var time = 0
-	tween = create_tween()
-	tween.tween_property(self, "rotation", 0, time)
-	tween.tween_callback(parent.follow_schedule)
-	tween.tween_callback(parent.drilling_gebiet_selection)
-
-
-func wait(action_) -> void:
+func wait() -> void:
 	var time = 1
 	tween = create_tween()
 	tween.tween_property(self, "rotation", 0, time).as_relative()
-	
-	match action_:
-		"moving":
-			tween.tween_callback(parent.get_closer_to_destination)
-	
-
+	var repeat = parent.arr.schedule[parent.arr.schedule.size()-2]
+	parent.arr.schedule.append(repeat)
+	tween.tween_callback(parent.follow_schedule)

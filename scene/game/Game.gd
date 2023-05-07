@@ -11,7 +11,7 @@ func _ready() -> void:
 	
 	for zunft in Global.obj.heer.arr.zunft:
 		for wohnwagen in zunft.arr.wohnwagen:
-			wohnwagen.follow_schedule()
+			wohnwagen.follow_phase()
 
 
 func _input(event) -> void:

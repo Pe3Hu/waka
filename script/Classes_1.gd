@@ -289,27 +289,59 @@ class Wohnwagen:
 	var vec = {}
 	var obj = {}
 	var arr = {}
+	var dict = {}
 	var color = {}
-	var flag = {}
 	var scene = {}
 
 
 	func _init(input_) -> void:
-		word.action = {}
-		word.action.previous = ""
+		word.task = "erzlager developing"
+		word.phase = {}
+		word.phase.current = ""
+		obj.zunft = input_.zunft
+		num.size = input_.size
+		vec.grid = null
+		dict.status = {}
+		color.background = Color()
+		init_num()
+		init_arr()
+		init_obj()
+		init_scene()
+		init_trailer()
+		init_archivar()
+		
+		set_phases_by_task()
+
+
+	func init_num() -> void:
 		num.speed = 300
 		num.drill = 100
 		num.radar = {}
 		num.radar.basic = 3
 		num.radar.current = num.radar.basic
-		vec.grid = null
-		obj.zunft = input_.zunft
-		num.size = input_.size
-		color.background = Color()
+		
+		num.weight = {}
+		num.weight.element = {}
+		var elements = []
+		elements.append_array(Global.arr.element)
+		var weights = [0.6,0.3,0.1]
+		elements.shuffle()
+		
+		while elements.size() > 0:
+			var element = elements.pop_front()
+			elements.erase(Global.dict.element.antipode[element])
+			num.weight.element[element] = weights.pop_front()
+
+
+	func init_arr() -> void:
 		arr.wagen = []
 		arr.schedule = []
 		arr.erzlager = []
 		arr.log = []
+		arr.phase = []
+
+
+	func init_obj() -> void:
 		obj.gebiet = {}
 		obj.gebiet.previous = null
 		obj.gebiet.current = null
@@ -317,10 +349,6 @@ class Wohnwagen:
 		obj.gebiet.destination = null
 		obj.cluster = {}
 		obj.cluster.destination = null
-		init_scene()
-		init_trailer()
-		init_archivar()
-		arr.schedule.append("echo sounding")
 
 
 	func init_scene() -> void:
@@ -352,8 +380,55 @@ class Wohnwagen:
 		scene.myself.update_position()
 
 
+	func set_phases_by_task() -> void:
+		arr.phase = []
+		dict.status.phase = {}
+		
+		match word.task:
+			"erzlager developing":
+				arr.phase.append("finding cluster for drill")
+				arr.phase.append("relocating into cluster")
+				arr.phase.append("entering cluster")
+				arr.phase.append("developing cluster")
+				arr.phase.append("end of task")
+		
+		reset_phases()
+
+
+	func reset_phases() -> void:
+		for phase in arr.phase:
+			dict.status.phase[phase] = false
+
+
+	func follow_phase() -> void:
+		word.phase.current = null
+		
+		for _i in arr.phase.size():
+			word.phase.current = arr.phase[_i]
+			
+			if !dict.status.phase[word.phase.current]:
+				break
+		
+		match word.phase.current:
+			"finding cluster for drill":
+				arr.schedule.append("echo sounding")
+			"relocating into cluster":
+				arr.schedule.append("moving")
+			"entering cluster":
+				arr.schedule.append("scanning")
+			"developing cluster":
+				arr.schedule.append("drill manvering")
+			"end of task":
+				set_phases_by_task()
+		
+		follow_schedule()
+
+
 	func follow_schedule() -> void:
 		if  arr.schedule.size() > 0:
+			if arr.schedule.size() > 1:
+				print(arr.schedule)
+			
 			var action = arr.schedule.pop_front()
 			
 			match action:
@@ -361,51 +436,44 @@ class Wohnwagen:
 					radar()
 				"moving":
 					get_closer_to_destination()
+				"parking":
+					stop_moving()
 				"scanning":
 					assess_near_gebiets()
 				"drill manvering":
 					drilling_gebiet_selection()
 				"drilling":
 					drill()
+				"waiting":
+					scene.myself.wait()
 			
 			arr.log.append(action)
 			
-			if arr.log.size() > 10:
+			if arr.log.size() > 15:
 				arr.log.pop_front()
+		else:
+			follow_phase()
 
 
 	func radar() -> void:
 		if obj.gebiet.current == null:
-			print("radar obj.gebiet.current error")
+			print("radar error obj.gebiet.current")
 			return
 		
 		var rings = num.radar.current
 		var arounds = Global.obj.insel.get_clusters_around_cluster(obj.gebiet.current.obj.cluster, rings)
 		arounds.pop_front()
 		var datas = []
-		var weight_of_curbeds = {
-			"Fire": 0.6,
-			"Halo": 0.3,
-			"Earth": 0.1
-		}
 		
 		for _i in arounds.size():
 			for cluster in arounds[_i]:
-				if cluster.flag.eruption and weight_of_curbeds.keys().has(cluster.word.element):
-#					var developeds = []
-#					developeds.append_array(cluster.arr.developed)
-#
-#					for gebiet in cluster.arr.gebiet:
-#						if !developeds.has(gebiet) and gebiet.obj.wohnwagen != null:
-#							developeds.append(gebiet)
-					
+				if cluster.flag.eruption and num.weight.element.keys().has(cluster.word.element):
 					if cluster.arr.gebiet.size() != cluster.arr.developed.size():
 						var data = {}
 						data.cluster = cluster
 						data.element = cluster.word.element
 						data.ring = _i+1
 						datas.append(data)
-					
 		
 		datas.sort_custom(func(a, b): return a.ring < b.ring)
 		
@@ -413,20 +481,17 @@ class Wohnwagen:
 		
 		for data in datas:
 			if data.ring == datas.front().ring:
-				options[data.cluster] = weight_of_curbeds[data.element]
+				options[data.cluster] = num.weight.element[data.element]
 		
 		if options.keys().size() == 0:
-			#for neighbor in obj.gebiet.current.obj.cluster.arr.neighbor:
-			#	options[neighbor] = 1
 			num.radar.current += 1
-			arr.schedule.append("echo sounding")
-			scene.myself.use_radar()
 		else:
 			num.radar.current = num.radar.basic
 			obj.cluster.destination = Global.get_random_key(options)
 			obj.gebiet.destination = null
-			arr.schedule.append("moving")
-			scene.myself.use_radar()
+			dict.status.phase[word.phase.current] = true
+		
+		scene.myself.use_radar()
 
 
 	func get_closer_to_destination() -> void:
@@ -439,11 +504,10 @@ class Wohnwagen:
 			
 			if obj.gebiet.destination != null:
 				destination = obj.gebiet.destination
-				
+			
+			var surroundeds = []
+			
 			if destination != null:
-				#if destination.obj.wohnwagen != null:
-				var surrounded = true
-				
 				for neighbor in destination.dict.neighbor.keys():
 					if neighbor.obj.wohnwagen == null:
 						var access = false
@@ -453,22 +517,17 @@ class Wohnwagen:
 								access = true
 						
 						if access:
-							surrounded = false
-							break
-					break
+							surroundeds.append(neighbor)
 				
-				if surrounded:
-					arr.schedule.append("echo sounding")
-					follow_schedule()
+				if surroundeds.size() == 0:
+					reset_phases()
 					return
 				else:
 					if destination.obj.wohnwagen != null:
-						arr.schedule.append("drill manvering")
-						follow_schedule()
+						shift_destination_focus(surroundeds)
 						return
 			
 			main_direction = destination.vec.grid-obj.gebiet.current.vec.grid
-			
 			var main_distance = abs(main_direction.x)+abs(main_direction.y)
 			
 			if main_distance > 0:
@@ -494,7 +553,6 @@ class Wohnwagen:
 						if distance.min > neighbor_distance:
 							distance.min = neighbor_distance
 				
-				
 				for neighbor in options.keys():
 					if optimal:
 						if options[neighbor] < 0:
@@ -502,39 +560,59 @@ class Wohnwagen:
 					else:
 						options[neighbor] = pow((distance.max-options[neighbor]),2)
 				
-				
 				if options.size() == 0:
-					scene.myself.wait("moving")
+					arr.schedule.append("waiting")
+					follow_schedule()
 				else:
 					obj.gebiet.next = Global.get_random_key(options)
+					arr.schedule.append("parking")
 					scene.myself.move_to_next_gebiet()
 			else:
-				#print("Wtf shedule")
 				obj.gebiet.next = obj.gebiet.current
-				parking()
+				arr.schedule.append("parking")
+				follow_schedule()
 
 
-	func parking() -> void:
-		obj.gebiet.current = obj.gebiet.next
-		obj.gebiet.next = null
+	func shift_destination_focus(surroundeds_: Array) -> void:
+		obj.gebiet.destination = Global.get_random_element(surroundeds_)
+		follow_phase()
+
+
+	func after_stop_action() -> void:
+		if obj.gebiet.current == null:
+			print("error stop moving")
+			obj.gebiet.destination = obj.gebiet.previous
+			obj.gebiet.previous = obj.gebiet.next
+			follow_phase()
+			return
 		
 		if obj.cluster.destination != null:
-			if obj.gebiet.current.obj.cluster == obj.cluster.destination:
-				obj.cluster.destination = null
-				arr.schedule.append("scanning")
-		
+				if obj.gebiet.current.obj.cluster == obj.cluster.destination:
+					obj.cluster.destination = null
+					dict.status.phase[word.phase.current] = true
 		
 		if obj.gebiet.destination != null:
 			if obj.gebiet.current == obj.gebiet.destination:
 				obj.gebiet.destination = null
+				arr.schedule.append("drilling")
 				obj.gebiet.current.obj.cluster.add_developed(obj.gebiet.current)
 				obj.gebiet.current.obj.cluster.check_eruption()
-				arr.schedule.append("drilling")
-		
+			
 		if obj.cluster.destination != null or obj.gebiet.destination != null:
 			arr.schedule.append("moving")
 		
 		follow_schedule()
+
+
+	func stop_moving() -> void:
+		if obj.gebiet.next == null:
+			print("error parking obj.gebiet.next")
+			return
+		
+		#if obj.gebiet.current != obj.gebiet.next:
+		obj.gebiet.current = obj.gebiet.next
+		obj.gebiet.next = null
+		after_stop_action()
 
 
 	func assess_near_gebiets() -> void:
@@ -543,13 +621,14 @@ class Wohnwagen:
 				gebiet.obj.erzlager.arr.access.append(self)
 				arr.erzlager.append(gebiet.obj.erzlager)
 		
-		arr.schedule.append("drill manvering")
-		follow_schedule()
+		dict.status.phase[word.phase.current] = true
+		follow_phase()
 
 
 	func drilling_gebiet_selection() -> void:
 		if obj.gebiet.current == null:
 			print("error in drilling_gebiet_selection obj.gebiet.current")
+			print(obj.gebiet)
 			return
 		var options = {}
 		
@@ -573,26 +652,31 @@ class Wohnwagen:
 			obj.gebiet.destination = Global.get_random_key(options)
 			
 			if obj.gebiet.destination == obj.gebiet.current:
+				obj.gebiet.destination = null
 				arr.schedule.append("drilling")
 				obj.gebiet.current.obj.cluster.add_developed(obj.gebiet.current)
 				obj.gebiet.current.obj.cluster.check_eruption()
-				obj.gebiet.destination = null
 			else:
 				arr.schedule.append("moving")
 			
 			scene.myself.use_scan()
 		else:
-			arr.schedule.append("echo sounding")
-			follow_schedule()
+			dict.status.phase[word.phase.current] = true
+			follow_phase()
 
 
 	func drill() -> void:
+		if obj.gebiet.current == null:
+			print("drill obj.gebiet.current error")
+			print(obj.gebiet)
+			return
+		
 		if obj.gebiet.current.obj.erzlager.num.fossil.current >= num.drill:
 			arr.schedule.append("drilling")
 			scene.myself.use_drill()
 			obj.gebiet.current.scene.myself.recolor_by_erzlager()
 		else:
-			scene.myself.end_drill()
+			follow_phase()
 
 
 #Гильдия
