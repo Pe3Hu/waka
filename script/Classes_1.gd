@@ -235,11 +235,19 @@ class Trailer:
 	var num = {}
 	var arr = {}
 	var obj = {}
+	var scene = {}
 
 
 	func _init(input_) -> void:
 		obj.wohnwagen = input_.wohnwagen
 		init_cargo()
+		init_scene()
+
+
+	func init_scene() -> void:
+		scene.myself = Global.scene.trailer.instantiate()
+		scene.myself.set_parent(self)
+		obj.wohnwagen.obj.zunft.obj.heer.scene.myself.get_node("Trailers").add_child(scene.myself)
 
 
 	func init_cargo() -> void:
@@ -247,6 +255,10 @@ class Trailer:
 		num.cargo = {}
 		num.cargo.current = 0
 		num.cargo.max = 10000.0
+		num.cargo.compartment = {}
+		num.size = {}
+		num.size.compartment = 50
+		num.size.section = num.cargo.max/num.size.compartment
 
 
 	func chipping_away_at_nugget(erzlager_) -> void:
@@ -271,15 +283,41 @@ class Trailer:
 		
 		#print("nugget_size: ", nugget)
 		erzlager_.num.fossil.current -= nugget
-		add_nugget(nugget)
+		erzlager_.obj.gebiet.obj.insel.num.fossil.current += nugget
+		var input = {}
+		input.nugget_size = nugget
+		input.erzlager = erzlager_
+		add_nugget(input)
 
 
-	func add_nugget(nugget_) -> void:
-		arr.nugget.append(nugget_)
-		num.cargo.current += nugget_
+	func add_nugget(input_) -> void:
+		arr.nugget.append(input_.nugget_size)
+		num.cargo.current += input_.nugget_size
+		fill_compartment(input_)
 		
 		if num.cargo.current > num.cargo.max:
-			print("overcargo")
+			obj.wohnwagen.word.task = "fall into stasis"
+			obj.wohnwagen.set_phases_by_task()
+
+
+	func fill_compartment(input_) -> void:
+		var a = num.cargo.compartment.keys().has(input_.erzlager.word.element)
+		
+		if !num.cargo.compartment.keys().has(input_.erzlager.word.element):
+			num.cargo.compartment[input_.erzlager.word.element] = [input_.nugget_size]
+		else:
+			var back = num.cargo.compartment[input_.erzlager.word.element].pop_back()
+			back += input_.nugget_size
+			num.cargo.compartment[input_.erzlager.word.element].append(back)
+		
+		while num.cargo.compartment[input_.erzlager.word.element].back() > num.size.section:
+			var back = num.cargo.compartment[input_.erzlager.word.element].pop_back()
+			back -= num.size.section
+			num.cargo.compartment[input_.erzlager.word.element].append(num.size.section)
+			num.cargo.compartment[input_.erzlager.word.element].append(back)
+			scene.myself.sections[input_.erzlager.word.element].append(num.size.section)
+		
+		scene.myself.update_bars()
 
 
 #Караван
@@ -296,6 +334,7 @@ class Wohnwagen:
 
 	func _init(input_) -> void:
 		word.task = "erzlager developing"
+		word.title = Global.generate_unique_title("Intro+Outro")
 		word.phase = {}
 		word.phase.current = ""
 		obj.zunft = input_.zunft
@@ -391,6 +430,9 @@ class Wohnwagen:
 				arr.phase.append("entering cluster")
 				arr.phase.append("developing cluster")
 				arr.phase.append("end of task")
+			"fall into stasis":
+				arr.phase.append("start stasis")
+				arr.phase.append("end of task")
 		
 		reset_phases()
 
@@ -418,6 +460,8 @@ class Wohnwagen:
 				arr.schedule.append("scanning")
 			"developing cluster":
 				arr.schedule.append("drill manvering")
+			"start stasis":
+				arr.schedule.append("waiting")
 			"end of task":
 				set_phases_by_task()
 		
@@ -687,8 +731,9 @@ class Zunft:
 
 
 	func _init(input_) -> void:
-		obj.gewerkschaft = null
 		word.title = input_.title
+		obj.heer = input_.heer
+		obj.gewerkschaft = null
 		init_wohnwagens()
 		init_wagens()
 		spread_wagens()
@@ -742,11 +787,18 @@ class Heer:
 	var word = {}
 	var arr = {}
 	var obj = {}
+	var scene = {}
 
 
 	func _init() -> void:
+		init_scene()
 		init_zunfts()
 		spread_zunfts()
+
+
+	func init_scene() -> void:
+		scene.myself = Global.scene.heer.instantiate()
+		Global.node.game.get_node("Layer1").add_child(scene.myself)
 
 
 	func init_zunfts() -> void:
@@ -755,7 +807,7 @@ class Heer:
 		
 		for _i in n:
 			var input = {}
-			input.zunft = self
+			input.heer = self
 			input.title = str(_i)
 			var zunft = Classes_1.Zunft.new(input)
 			arr.zunft.append(zunft)

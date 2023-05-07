@@ -27,6 +27,13 @@ class Erzlager:
 		num.fossil.current = 0
 		num.fossil.ejection = num.fossil.max*0.8
 		arr.access = []
+		obj.gebiet.obj.insel.num.fossil.max += num.fossil.max
+
+
+	func add_fossil(fossil_) -> void:
+		var fossil = min(fossil_, num.fossil.max-num.fossil.current)
+		num.fossil.current += fossil
+		obj.gebiet.obj.insel.num.fossil.current += fossil
 
 
 #Область
@@ -150,7 +157,7 @@ class Cluster:
 			var flow = Global.rng.randi_range(min_ejection, max_ejection)
 			#print(flow," < ",rest_ejection, " < ", max_ejection)
 			rest_ejection -= flow
-			gebiet.obj.erzlager.num.fossil.current += flow
+			gebiet.obj.erzlager.add_fossil(flow)
 		
 		gebiets.back().obj.erzlager.num.fossil.current += rest_ejection
 		
@@ -199,12 +206,14 @@ class Cluster:
 
 #Остров
 class Insel:
+	var num = {}
 	var arr = {}
 	var obj = {}
 	var scene = {}
 
 
 	func _init() -> void:
+		init_num()
 		init_scene()
 		init_meilensteins()
 		init_gebiets()
@@ -212,8 +221,20 @@ class Insel:
 		eruption_of_elements()
 
 
+	func init_num() -> void:
+		num.fossil = {}
+		num.fossil.current = 0
+		num.fossil.max = 0
+		num.fossil.eruption = 0.1
+		
+		num.sludge = {}
+		num.sludge.min = 10
+		num.sludge.max = 20
+
+
 	func init_scene() -> void:
 		scene.myself = Global.scene.insel.instantiate()
+		scene.myself.set_parent(self)
 		Global.node.game.get_node("Layer0").add_child(scene.myself)
 
 
@@ -596,6 +617,16 @@ class Insel:
 			arounds.append(next_ring)
 		
 		return arounds
+
+
+	func check_eruption():
+		var percent = float(num.fossil.current)/num.fossil.max
+		
+		if percent < num.fossil.eruption:
+			eruption_of_elements()
+		
+		print(percent)
+
 
 
 	func check_meilenstein(grid_) -> bool:

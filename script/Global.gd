@@ -35,6 +35,9 @@ func init_num() -> void:
 	num.lied.min_size.masters = 1
 	num.lied.min_size.hierarchy = 3
 	num.lied.min_size.pureblood = 3
+	
+	num.title = {}
+	num.title.max_size = 20
 
 
 func init_dict() -> void:
@@ -91,8 +94,20 @@ func init_dict() -> void:
 		"Dark": "Halo"
 	}
 	
+	var max_hue = 360.0
+	
+	dict.element.hue = {
+		"Fire": 350/max_hue,
+		"Wind": 180/max_hue,
+		"Aqua": 220/max_hue,
+		"Earth": 100/max_hue,
+		"Halo": 60/max_hue,
+		"Dark": 290/max_hue,
+	}
+	
 	init_sin()
 	init_lied()
+	init_title()
 
 
 func init_sin() -> void:
@@ -145,12 +160,25 @@ func init_lied() -> void:
 				dict.lied.parameter[parameter][size].append(key)
 			else:
 				dict.lied.parameter[parameter][size] = [key]
+
+
+func init_title() -> void:
+	dict.title = {}
+	var path = "res://asset/json/wohnwagen_title_data.json"
+	var array = load_data(path)
 	
+	for key in array.front().keys():
+		dict.title[key] = []
+	
+	for dict_ in array:
+		for key in dict_.keys():
+			dict.title[key].append(dict_[key])
 
 
 func init_arr() -> void:
 	arr.color = ["Red","Green","Blue","Yellow"]
 	arr.element = ["Aqua","Wind","Fire","Earth","Halo","Dark"]
+	arr.title = []
 	
 	arr.neighbor = [
 		[
@@ -198,7 +226,9 @@ func init_node() -> void:
 func init_scene() -> void:
 	scene.insel = load("res://scene/0/insel.tscn")
 	scene.gebiet = load("res://scene/0/gebiet.tscn")
+	scene.heer = load("res://scene/1/Heer.tscn")
 	scene.wohnwagen = load("res://scene/1/wohnwagen.tscn")
+	scene.trailer = load("res://scene/1/trailer.tscn")
 
 
 func init_vec():
@@ -328,6 +358,30 @@ func from_weight_to_percentage(dict_: Dictionary) -> Dictionary:
 		result[key] = round(float(dict_[key])/total*100)
 	
 	return result
+
+
+func generate_unique_title(type_: String) -> String:
+	var title = generate_title(type_)
+	
+	while arr.title.has(title) or num.title.max_size < title.length():
+		title = generate_title(type_)
+	
+	return title
+
+
+func generate_title(type_: String) -> String:
+	var title = ""
+	
+	if dict.title.keys().has(type_):
+		dict.title = get_random_element(dict.title[type_])
+	else:
+		match type_:
+			"Intro+Outro":
+				var intro = get_random_element(dict.title["Intro"])
+				var outro = get_random_element(dict.title["Outro"])
+				title = intro + " " + outro
+	
+	return title
 
 
 func fill_ethnography_parameters(obj_, runes_: Array) -> void:

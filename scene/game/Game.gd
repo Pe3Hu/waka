@@ -12,6 +12,16 @@ func _ready() -> void:
 	for zunft in Global.obj.heer.arr.zunft:
 		for wohnwagen in zunft.arr.wohnwagen:
 			wohnwagen.follow_phase()
+	
+#	var letters = 0
+#	var wohnwagens = 0
+#
+#	for zunft in Global.obj.heer.arr.zunft:
+#		for wohnwagen in zunft.arr.wohnwagen:
+#			letters += wohnwagen.word.title.length()
+#			wohnwagens += 1.0
+#
+#	print(letters/wohnwagens)
 
 
 func _input(event) -> void:

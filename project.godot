@@ -28,5 +28,5 @@ Classes_6="*res://script/Classes_6.gd"
 
 [display]
 
-window/size/viewport_width=1200
+window/size/viewport_width=1400
 window/size/viewport_height=800

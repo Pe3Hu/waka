@@ -26,20 +26,7 @@ func recolor_by_erzlager() -> void:
 		s += 0.7*fossil+0.05
 		
 		if parent.obj.cluster != null:
-			match parent.obj.erzlager.word.element:
-				"Fire":
-					h = 350/max_h
-				"Wind":
-					h = 180/max_h
-				"Aqua":
-					h = 220/max_h
-				"Earth":
-					h = 100/max_h
-				"Halo":
-					h = 60/max_h
-				"Dark":
-					h = 290/max_h
-					
+			h = Global.dict.element.hue[parent.obj.erzlager.word.element]
 		
 		parent.color.background = Color.from_hsv(h,s,v)
 		set_color(parent.color.background)

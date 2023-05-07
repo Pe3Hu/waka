@@ -107,6 +107,9 @@ func wait() -> void:
 	var time = 1
 	tween = create_tween()
 	tween.tween_property(self, "rotation", 0, time).as_relative()
-	var repeat = parent.arr.schedule[parent.arr.schedule.size()-2]
-	parent.arr.schedule.append(repeat)
+	
+	if parent.word.task != "fall into stasis":
+		var repeat = parent.arr.schedule[parent.arr.schedule.size()-2]
+		parent.arr.schedule.append(repeat)
+	
 	tween.tween_callback(parent.follow_schedule)
