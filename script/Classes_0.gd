@@ -26,6 +26,7 @@ class Erzlager:
 		num.fossil.max = 1000
 		num.fossil.current = 0
 		num.fossil.ejection = num.fossil.max*0.8
+		num.fossil.spill = 0.5
 		arr.access = []
 		obj.gebiet.obj.insel.num.fossil.max += num.fossil.max
 
@@ -34,6 +35,18 @@ class Erzlager:
 		var fossil = min(fossil_, num.fossil.max-num.fossil.current)
 		num.fossil.current += fossil
 		obj.gebiet.obj.insel.num.fossil.current += fossil
+		
+		if float(num.fossil.current)/num.fossil.max > num.fossil.spill:
+			obj.gebiet.obj.cluster.add_spilled_gebiet(obj.gebiet)
+
+
+	func remove_fossil(fossil_) -> void:
+		var fossil = min(fossil_, num.fossil.current)
+		num.fossil.current -= fossil
+		obj.gebiet.obj.insel.num.fossil.current -= fossil
+		
+		if float(num.fossil.current)/num.fossil.max < num.fossil.spill:
+			obj.gebiet.obj.cluster.arr.spilled.erase(obj.gebiet) 
 
 
 #Область
@@ -96,6 +109,7 @@ class Cluster:
 		arr.gebiet = input_.gebiets
 		arr.neighbor = []
 		arr.developed = []
+		arr.spilled = []
 		obj.center = input_.center
 		obj.insel = input_.insel
 		flag.on_screen = true
@@ -204,6 +218,17 @@ class Cluster:
 				gebiet.scene.myself.paint_black()
 
 
+	func add_spilled_gebiet(gebiet_) -> void:
+		if !arr.spilled.has(gebiet_):
+			arr.spilled.append(gebiet_)
+			check_spilled()
+
+
+	func check_spilled() -> void:
+		if arr.spilled.size() > float(arr.gebiet.size())/2:
+			flag.eruption = true
+
+
 #Остров
 class Insel:
 	var num = {}
@@ -229,7 +254,7 @@ class Insel:
 		
 		num.sludge = {}
 		num.sludge.min = 10
-		num.sludge.max = 20
+		num.sludge.max = 40
 
 
 	func init_scene() -> void:

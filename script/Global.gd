@@ -38,6 +38,62 @@ func init_num() -> void:
 	
 	num.title = {}
 	num.title.max_size = 20
+	
+	num.modul = {}
+	num.modul.indicator = {}
+	num.modul.indicator[0] = {}
+	num.modul.indicator[0].basis = 10
+	num.modul.indicator[0].deviation = 3
+	num.modul.indicator[1] = {}
+	num.modul.indicator[1].basis = 12
+	num.modul.indicator[1].deviation = 4
+	num.modul.indicator[2] = {}
+	num.modul.indicator[2].basis = 15
+	num.modul.indicator[2].deviation = 5
+	
+	init_module_prices()
+	
+	num.modul.weight = {}
+	num.modul.weight.modul = {}
+	num.modul.weight.modul["motor"] = 1500
+	num.modul.weight.modul["locator"] = 800
+	num.modul.weight.modul["handler"] = 1000
+	num.modul.weight.modul["packer"] = 750
+	num.modul.weight.modul["spear"] = 1250
+	num.modul.weight.modul["shield"] = 1250
+	num.modul.weight.rank = 0.25
+
+
+func init_module_prices() -> void:
+	num.modul.price = {}
+	num.modul.price.rank = {}
+	num.modul.price.rank[0] = 100
+	num.modul.price.rank[1] = 125
+	num.modul.price.rank[2] = 175
+	num.modul.price.deviation = {}
+	
+	var max_deviation = 0
+	
+	for rank in num.modul.indicator.keys():
+		if max_deviation < num.modul.indicator[rank].deviation:
+			max_deviation = num.modul.indicator[rank].deviation
+	
+	var prices = []
+	var price = -1
+	var step = 11
+	
+	for _i in max_deviation:
+		price += step
+		prices.append(price)
+		step += 1
+	
+	prices.push_front(0)
+	
+	for _i in prices.size():
+		num.modul.price.deviation[_i] = prices[_i]
+		
+		if _i != 0:
+			num.modul.price.deviation[-_i] = -prices[_i]
 
 
 func init_dict() -> void:
@@ -108,6 +164,8 @@ func init_dict() -> void:
 	init_sin()
 	init_lied()
 	init_title()
+	init_karkasse()
+	init_modul()
 
 
 func init_sin() -> void:
@@ -173,6 +231,61 @@ func init_title() -> void:
 	for dict_ in array:
 		for key in dict_.keys():
 			dict.title[key].append(dict_[key])
+
+
+func init_karkasse() -> void:
+	dict.karkasse = {}
+	var path = "res://asset/json/karkasse_data.json"
+	var array = load_data(path)
+	dict.karkasse.nickname = {}
+	dict.karkasse.prices = []
+	
+	for karkasse in array:
+		var data = {}
+
+		for key in karkasse.keys():
+			if key != "nickname" && karkasse[key] > 0:
+				data[key] = karkasse[key]
+			
+		if !dict.karkasse.prices.has(karkasse["price"]):
+			dict.karkasse.prices.append(karkasse["price"])
+		
+		dict.karkasse.nickname[karkasse["nickname"]] = data
+	
+	dict.karkasse.prices.sort_custom(func(a, b): return a > b)
+	
+	for nickname in dict.karkasse.nickname:
+		var karkasse = dict.karkasse.nickname[nickname]
+		var rarity = dict.karkasse.prices.find(dict.karkasse.nickname[nickname]["price"])
+		var degree = rarity
+		karkasse.rarity = pow(rarity+1,degree)
+		print()
+
+
+func init_modul() -> void:
+	dict.modul = {}
+	dict.modul.aspect = {}
+	dict.modul.aspect["speed"] = "motor"
+	dict.modul.aspect["drill"] = "motor"
+	dict.modul.aspect["radar"] = "locator"
+	dict.modul.aspect["jewellery"] = "locator"
+	dict.modul.aspect["memory"] = "handler"
+	dict.modul.aspect["intellect"] = "handler"
+	dict.modul.aspect["price"] = "handler"
+	dict.modul.aspect["cargo"] = "packer"
+	dict.modul.aspect["tempo"] = "packer"
+	dict.modul.aspect["attack"] = "spear"
+	dict.modul.aspect["debuff"] = "spear"
+	dict.modul.aspect["defense"] = "shield"
+	dict.modul.aspect["buff"] = "shield"
+	
+	arr.modul = []
+	
+	for key in dict.modul.aspect.keys():
+		var modul = dict.modul.aspect[key]
+		
+		if !arr.modul.has(modul):
+			arr.modul.append(modul)
 
 
 func init_arr() -> void:

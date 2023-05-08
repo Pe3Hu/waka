@@ -1,0 +1,123 @@
+[
+ {
+  "nickname": "balance",
+  "motor": 1,
+  "locator": 1,
+  "handler": 1,
+  "packer": 1,
+  "spear": 1,
+  "shield": 1,
+  "price": 1000,
+  "tonnage": 15000
+ },
+ {
+  "nickname": "motoro",
+  "motor": 2,
+  "locator": 1,
+  "handler": 1,
+  "packer": 1,
+  "spear": 1,
+  "shield": 1,
+  "price": 1200,
+  "tonnage": 20000
+ },
+ {
+  "nickname": "locatoro",
+  "motor": 1,
+  "locator": 2,
+  "handler": 1,
+  "packer": 1,
+  "spear": 1,
+  "shield": 1,
+  "price": 1200,
+  "tonnage": 20000
+ },
+ {
+  "nickname": "handlero",
+  "motor": 1,
+  "locator": 1,
+  "handler": 2,
+  "packer": 1,
+  "spear": 1,
+  "shield": 1,
+  "price": 1200,
+  "tonnage": 20000
+ },
+ {
+  "nickname": "packero",
+  "motor": 1,
+  "locator": 1,
+  "handler": 1,
+  "packer": 2,
+  "spear": 1,
+  "shield": 1,
+  "price": 1200,
+  "tonnage": 25000
+ },
+ {
+  "nickname": "spearo",
+  "motor": 1,
+  "locator": 1,
+  "handler": 1,
+  "packer": 1,
+  "spear": 2,
+  "shield": 1,
+  "price": 1200,
+  "tonnage": 20000
+ },
+ {
+  "nickname": "shieldo",
+  "motor": 1,
+  "locator": 1,
+  "handler": 1,
+  "packer": 1,
+  "spear": 1,
+  "shield": 2,
+  "price": 1200,
+  "tonnage": 20000
+ },
+ {
+  "nickname": "boar",
+  "motor": 2,
+  "locator": 2,
+  "handler": 1,
+  "packer": 1,
+  "spear": 1,
+  "shield": 1,
+  "price": 1500,
+  "tonnage": 25000
+ },
+ {
+  "nickname": "bear",
+  "motor": 1,
+  "locator": 2,
+  "handler": 1,
+  "packer": 2,
+  "spear": 1,
+  "shield": 1,
+  "price": 1500,
+  "tonnage": 30000
+ },
+ {
+  "nickname": "shark",
+  "motor": 1,
+  "locator": 1,
+  "handler": 2,
+  "packer": 1,
+  "spear": 2,
+  "shield": 1,
+  "price": 1500,
+  "tonnage": 25000
+ },
+ {
+  "nickname": "turtle",
+  "motor": 1,
+  "locator": 1,
+  "handler": 2,
+  "packer": 1,
+  "spear": 1,
+  "shield": 2,
+  "price": 1500,
+  "tonnage": 25000
+ }
+]

@@ -1,325 +1,6 @@
 extends Node
 
 
-#Телега
-class Wagen:
-	var obj = {}
-
-
-	func _init(input_) -> void:
-		obj.wohnwagen = null
-		obj.zunft = input_.zunft
-
-
-#Летопись
-class Chronik:
-	var obj = {}
-	var arr = {}
-	var dict = {}
-
-
-	func _init(input_) -> void:
-		obj.archivar = input_.archivar
-		dict.ethnography = {}
-		init_runes()
-		init_parameters()
-
-
-	func init_runes() -> void:
-		arr.rune = {}
-		#total runes
-		arr.rune.archive = []
-		#current runes
-		arr.rune.thought = []
-		#future runes
-		arr.rune.insight = []
-		#previous runes
-		arr.rune.memoir = []
-		#exiled runes
-		arr.rune.forgotten = []
-
-
-	func init_parameters() -> void:
-		dict.ethnography = {}
-		
-		for parameter in Global.dict.lied.parameter:
-			if parameter != "servants":
-				dict.ethnography[parameter] = {}
-
-
-	func fill_thought() -> void:
-		if arr.rune.insight.size() == 0:
-			arr.rune.archive.shuffle()
-			fill_insight()
-		
-		var space_left = obj.archivar.num.memory-arr.rune.thought.size()
-		var novelty = min(space_left, obj.archivar.num.intellect)
-		
-		for _i in novelty:
-			var rune = arr.rune.insight.pop_front()
-			arr.rune.thought.append(rune)
-		
-		fill_insight()
-		highlight_ehroniks()
-
-
-	func fill_insight() -> void:
-		while obj.archivar.num.intellect > arr.rune.insight.size():
-			pull_rune_from_archive()
-
-
-	func pull_rune_from_archive() -> void:
-		if arr.rune.archive.size() == 0:
-			arr.rune.archive.append_array(arr.rune.memoir)
-			arr.rune.memoir = []
-		
-		arr.rune.archive.shuffle()
-		var rune = arr.rune.archive.pop_front()
-		arr.rune.insight.append(rune)
-
-
-	func highlight_ehroniks() -> void:
-		arr.ehronik = []
-		Global.fill_ethnography_parameters(self, arr.rune.thought)
-		var ehronik_runes = []
-		masters_and_pureblood_repositioning(ehronik_runes)
-		hierarchy_repositioning(ehronik_runes)
-		fill_ehroniks(ehronik_runes)
-
-
-	func fill_parameters() -> void:
-		init_parameters()
-		var powers = []
-		
-		for rune in arr.rune.thought:
-			if dict.ethnography["masters"].keys().has(rune.num.power):
-				dict.ethnography["masters"][rune.num.power].append(rune)
-			else:
-				dict.ethnography["masters"][rune.num.power] = [rune]
-				powers.append(rune.num.power)
-			
-			if dict.ethnography["pureblood"].keys().has(rune.word.abbreviation):
-				dict.ethnography["pureblood"][rune.word.abbreviation].append(rune)
-			else:
-				dict.ethnography["pureblood"][rune.word.abbreviation] = [rune]
-		
-		powers.sort()
-		
-		while powers.size() > 0:
-			var power = powers.pop_front()
-			dict.ethnography["hierarchy"][power] = [power]
-			
-			if powers.size() > 0:
-				var next_power = powers.pop_front()
-				
-				while next_power == dict.ethnography["hierarchy"][power].back()+1:
-					dict.ethnography["hierarchy"][power].append(next_power)
-					next_power = powers.pop_front()
-					
-				powers.push_front(next_power)
-		
-		for parameter in dict.ethnography.keys():
-			for _i in range(dict.ethnography[parameter].keys().size()-1,-1,-1):
-				var key = dict.ethnography[parameter].keys()[_i]
-				
-				if dict.ethnography[parameter][key].size() < Global.num.lied.min_size[parameter]:
-					dict.ethnography[parameter].erase(key)
-
-
-	func masters_and_pureblood_repositioning(ehronik_runes_: Array) -> void:
-		var parameters = ["masters","pureblood"]
-		
-		for parameter in parameters:
-			for power in dict.ethnography[parameter].keys():
-				var subpart_sizes = []
-				
-				for size in range(Global.num.lied.min_size[parameter],dict.ethnography[parameter][power].size()+1,1):
-					subpart_sizes.append(size)
-				
-				var subparts = Global.get_all_subparts(dict.ethnography[parameter][power], subpart_sizes, parameter)
-				
-				for size in subparts.keys():
-					for runes in subparts[size]:
-						if !ehronik_runes_.has(runes):
-							ehronik_runes_.append(runes)
-
-
-	func hierarchy_repositioning(ehronik_runes_) -> void:
-		var parameter = "hierarchy"
-		var powers = []
-		
-		for begin in dict.ethnography[parameter].keys():
-			var runes = []
-			var subpart_sizes = []
-			
-			for size in range(Global.num.lied.min_size[parameter],dict.ethnography[parameter][begin].size()+1,1):
-				subpart_sizes.append(size)
-			
-			var subparts = Global.get_all_subparts(dict.ethnography[parameter][begin], subpart_sizes, parameter)
-			
-			for size in subparts.keys():
-				for _i in range(subparts[size].size()-1,-1,-1):
-					var hierarchy = true
-					var subpart = subparts[size][_i]
-			
-					for _j in range(0,subpart.size()-1):
-						if subpart[_j]+1 != subpart[_j+1]:
-							hierarchy = false
-							break
-					
-					if hierarchy && !powers.has(subpart):
-						#subparts[size].erase(subpart)
-						powers.append(subpart)
-		
-		
-		for powers_ in powers:
-			var options = []
-			for power in powers_:
-				options.append(dict.ethnography["masters"][power]) 
-				
-			var substitutions = Global.get_all_substitution(options)
-			
-			for runes in substitutions:
-				runes.sort_custom(func(a, b): return a.num.index > b.num.index)
-				
-				if !ehronik_runes_.has(runes):
-					ehronik_runes_.append(runes)
-
-
-	func fill_ehroniks(ehronik_runes_) -> void:
-		for runes in ehronik_runes_:
-			var input = {}
-			input.chronik = self
-			input.runes = runes
-			var ehronik = Classes_2.Entwurf.new(input)
-			arr.ehronik.append(ehronik)
-
-
-#Архивариус
-class Archivar:
-	var num = {}
-	var obj = {}
-
-
-	func _init(input_) -> void:
-		num.intellect = 10
-		num.memory = 10
-		obj.wohnwagen = input_.wohnwagen
-		init_chronik()
-		set_standard_content_of_chronik()
-		
-		#obj.chronik.fill_thought()
-		
-		#for rune in obj.chronik.arr.rune.thought:
-		#	print(rune.word.abbreviation,rune.num.power)
-
-
-	func init_chronik() -> void:
-		var input = {}
-		input.archivar = self
-		obj.chronik = Classes_1.Chronik.new(input)
-
-
-	func set_standard_content_of_chronik() -> void:
-		for alphabet in Global.obj.lexikon.arr.alphabet:
-			for rune in alphabet.arr.rune:
-				add_rune_to_chronik(rune)
-
-
-	func add_rune_to_chronik(rune_) -> void:
-		obj.chronik.arr.rune.archive.append(rune_)
- 
-
-#Прицеп
-class Trailer:
-	var num = {}
-	var arr = {}
-	var obj = {}
-	var scene = {}
-
-
-	func _init(input_) -> void:
-		obj.wohnwagen = input_.wohnwagen
-		init_cargo()
-		init_scene()
-
-
-	func init_scene() -> void:
-		scene.myself = Global.scene.trailer.instantiate()
-		scene.myself.set_parent(self)
-		obj.wohnwagen.obj.zunft.obj.heer.scene.myself.get_node("Trailers").add_child(scene.myself)
-
-
-	func init_cargo() -> void:
-		arr.nugget = []
-		num.cargo = {}
-		num.cargo.current = 0
-		num.cargo.max = 10000.0
-		num.cargo.compartment = {}
-		num.size = {}
-		num.size.compartment = 50
-		num.size.section = num.cargo.max/num.size.compartment
-
-
-	func chipping_away_at_nugget(erzlager_) -> void:
-		var max_nugget = min(erzlager_.num.fossil.current, obj.wohnwagen.num.drill)
-		var drill_step = 10
-		var iteration = 0
-		var nugget = 0
-		var fiasco = {}
-		fiasco[true] = 100.0
-		fiasco[false] = 0
-		
-		while Global.get_random_key(fiasco):
-			iteration += 1.0
-			nugget += drill_step*iteration
-			
-			fiasco[true] = 1.0/(iteration+1.0)
-			fiasco[false] =  1.0-fiasco[true]
-			
-			if nugget >= max_nugget:
-				fiasco[false] = 1.0
-				fiasco[true] = 0.0
-		
-		#print("nugget_size: ", nugget)
-		erzlager_.num.fossil.current -= nugget
-		erzlager_.obj.gebiet.obj.insel.num.fossil.current += nugget
-		var input = {}
-		input.nugget_size = nugget
-		input.erzlager = erzlager_
-		add_nugget(input)
-
-
-	func add_nugget(input_) -> void:
-		arr.nugget.append(input_.nugget_size)
-		num.cargo.current += input_.nugget_size
-		fill_compartment(input_)
-		
-		if num.cargo.current > num.cargo.max:
-			obj.wohnwagen.word.task = "fall into stasis"
-			obj.wohnwagen.set_phases_by_task()
-
-
-	func fill_compartment(input_) -> void:
-		var a = num.cargo.compartment.keys().has(input_.erzlager.word.element)
-		
-		if !num.cargo.compartment.keys().has(input_.erzlager.word.element):
-			num.cargo.compartment[input_.erzlager.word.element] = [input_.nugget_size]
-		else:
-			var back = num.cargo.compartment[input_.erzlager.word.element].pop_back()
-			back += input_.nugget_size
-			num.cargo.compartment[input_.erzlager.word.element].append(back)
-		
-		while num.cargo.compartment[input_.erzlager.word.element].back() > num.size.section:
-			var back = num.cargo.compartment[input_.erzlager.word.element].pop_back()
-			back -= num.size.section
-			num.cargo.compartment[input_.erzlager.word.element].append(num.size.section)
-			num.cargo.compartment[input_.erzlager.word.element].append(back)
-			scene.myself.sections[input_.erzlager.word.element].append(num.size.section)
-		
-		scene.myself.update_bars()
-
-
 #Караван
 class Wohnwagen:
 	var num = {}
@@ -399,13 +80,13 @@ class Wohnwagen:
 	func init_trailer() -> void:
 		var input = {}
 		input.wohnwagen = self
-		obj.trailer = Classes_1.Trailer.new(input)
+		obj.trailer = Classes_2.Trailer.new(input)
 
 
 	func init_archivar() -> void:
 		var input = {}
 		input.wohnwagen = self
-		obj.archivar = Classes_1.Archivar.new(input)
+		obj.archivar = Classes_2.Archivar.new(input)
 
 
 	func add_wagen(wagen_) -> void:
@@ -725,17 +406,20 @@ class Wohnwagen:
 
 #Гильдия
 class Zunft:
+	var num = {}
 	var word = {}
 	var arr = {}
 	var obj = {}
 
 
 	func _init(input_) -> void:
+		num.members = 10
 		word.title = input_.title
 		obj.heer = input_.heer
 		obj.gewerkschaft = null
 		init_wohnwagens()
 		init_wagens()
+		init_treibers()
 		spread_wagens()
 		set_start_location()
 
@@ -754,14 +438,26 @@ class Zunft:
 
 	func init_wagens() -> void:
 		arr.wagen = []
-		var n = 1
 		
-		for _i in n:
+		for _i in num.members:
 			var input = {}
-			input.type = "search"
 			input.zunft = self
-			var wagen = Classes_1.Wagen.new(input)
+			var wagen = Classes_2.Wagen.new(input)
 			arr.wagen.append(wagen)
+
+
+	func init_treibers() -> void:
+		arr.treiber = []
+		
+		for _i in num.members:
+			var input = {}
+			input.zunft = self
+			var treiber = Classes_2.Treiber.new(input)
+			arr.treiber.append(treiber)
+
+
+	func spread_treibers() -> void:
+		pass
 
 
 	func spread_wagens() -> void:
@@ -803,7 +499,7 @@ class Heer:
 
 	func init_zunfts() -> void:
 		arr.zunft = []
-		var n = 30
+		var n = 1
 		
 		for _i in n:
 			var input = {}

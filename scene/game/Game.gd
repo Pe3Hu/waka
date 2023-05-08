@@ -3,15 +3,16 @@ extends Node
 
 func _ready() -> void:
 	Global.obj.insel = Classes_0.Insel.new()
-	Global.obj.lexikon = Classes_2.Lexikon.new()
-	Global.obj.handel = Classes_3.Handel.new()
+	Global.obj.lexikon = Classes_3.Lexikon.new()
+	Global.obj.handel = Classes_4.Handel.new()
 	Global.obj.heer = Classes_1.Heer.new()
 	
 #	datas.sort_custom(func(a, b): return a.value > b.value)
 	
 	for zunft in Global.obj.heer.arr.zunft:
 		for wohnwagen in zunft.arr.wohnwagen:
-			wohnwagen.follow_phase()
+			pass
+			#wohnwagen.follow_phase()
 	
 #	var letters = 0
 #	var wohnwagens = 0
