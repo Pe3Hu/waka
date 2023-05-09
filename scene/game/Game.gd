@@ -8,11 +8,11 @@ func _ready() -> void:
 	Global.obj.heer = Classes_1.Heer.new()
 	
 #	datas.sort_custom(func(a, b): return a.value > b.value)
-	
 	for zunft in Global.obj.heer.arr.zunft:
 		for wohnwagen in zunft.arr.wohnwagen:
-			pass
-			#wohnwagen.follow_phase()
+			wohnwagen.return_to_gewerkschaft()
+			wohnwagen.set_phases_by_task()
+			wohnwagen.follow_phase()
 	
 #	var letters = 0
 #	var wohnwagens = 0

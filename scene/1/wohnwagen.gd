@@ -38,23 +38,10 @@ func init_vertexs() -> void:
 
 
 func recolor() -> void:
-	var h = 0.75
-	var s = 0.75
-	var v = 1
-	
 	if parent.obj.zunft.obj.gewerkschaft != null:
-		match parent.obj.zunft.obj.gewerkschaft.word.title:
-			"1":
-				h = 120.0/360
-			"2":
-				h = 200.0/360
-			"3":
-				h = 320.0/360
+		$Emblem.set_color(parent.color.emblem)
 	else:
-		s = 0
-	
-	parent.color.emblem = Color.from_hsv(h,s,v)
-	$Emblem.set_color(parent.color.emblem)
+		$Emblem.set_color(Color("black"))
 
 
 func update_position() -> void:
@@ -78,6 +65,7 @@ func move_to_next_gebiet() -> void:
 	parent.obj.gebiet.current.obj.wohnwagen = null
 	parent.obj.gebiet.next.obj.wohnwagen = parent
 	parent.obj.gebiet.previous = parent.obj.gebiet.current
+	parent.arr.path.append(parent.obj.gebiet.previous)
 	
 	var distance = parent.obj.gebiet.current.num.w+parent.obj.gebiet.next.num.w
 	var time = float(distance)/parent.num.speed

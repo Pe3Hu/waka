@@ -18,4 +18,3 @@ func _on_sludge_timeout():
 			gebiet.scene.myself.recolor_by_erzlager()
 	
 	parent.check_eruption()
-	

@@ -145,8 +145,6 @@ class Wagen:
 		obj.wohnwagen = null
 		init_karkasse()
 		init_moduls()
-		
-		print(obj.karkasse.word,obj.karkasse.num.tonnage.current)
 
 
 	func init_karkasse() -> void:

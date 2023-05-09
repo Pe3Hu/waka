@@ -14,7 +14,7 @@ class Wohnwagen:
 
 
 	func _init(input_) -> void:
-		word.task = "erzlager developing"
+		word.task = "start stasis"
 		word.title = Global.generate_unique_title("Intro+Outro")
 		word.phase = {}
 		word.phase.current = ""
@@ -23,18 +23,17 @@ class Wohnwagen:
 		vec.grid = null
 		dict.status = {}
 		color.background = Color()
+		color.emblem = Color()
 		init_num()
 		init_arr()
 		init_obj()
 		init_scene()
 		init_trailer()
 		init_archivar()
-		
-		set_phases_by_task()
 
 
 	func init_num() -> void:
-		num.speed = 300
+		num.speed = 3000
 		num.drill = 100
 		num.radar = {}
 		num.radar.basic = 3
@@ -59,6 +58,9 @@ class Wohnwagen:
 		arr.erzlager = []
 		arr.log = []
 		arr.phase = []
+		arr.path = []
+		arr.abkommen = []
+		arr.destination = []
 
 
 	func init_obj() -> void:
@@ -69,6 +71,7 @@ class Wohnwagen:
 		obj.gebiet.destination = null
 		obj.cluster = {}
 		obj.cluster.destination = null
+		obj.abkommen = null
 
 
 	func init_scene() -> void:
@@ -100,25 +103,52 @@ class Wohnwagen:
 		scene.myself.update_position()
 
 
+	func return_to_gewerkschaft() -> void:
+		obj.gebiet.destination = obj.zunft.obj.gewerkschaft.obj.hauptsitz.obj.gebiet
+		word.task = "dock at hauptsitz"
+
+
 	func set_phases_by_task() -> void:
 		arr.phase = []
 		dict.status.phase = {}
 		
 		match word.task:
-			"erzlager developing":
+			"mineral extraction":
 				arr.phase.append("finding cluster for drill")
-				arr.phase.append("relocating into cluster")
-				arr.phase.append("entering cluster")
-				arr.phase.append("developing cluster")
+				arr.phase.append("relocate into cluster")
+				arr.phase.append("enter cluster")
+				arr.phase.append("cluster develope")
 				arr.phase.append("end of task")
 			"fall into stasis":
 				arr.phase.append("start stasis")
+				arr.phase.append("end of task")
+			"dock at hauptsitz":
+				arr.phase.append("relocate into hauptsitz")
+				arr.phase.append("end of task")
+			"hauptsitz walk":
+				arr.phase.append("anschlagbrett review")
+				arr.phase.append("sign abkommen")
+				arr.phase.append("end of task")
+			"deliver":
+				arr.phase.append("set next hauptsitz as destination")
+				arr.phase.append("relocate into hauptsitz")
+				arr.phase.append("get reward")
+				arr.phase.append("end of task")
+			"pick up":
+				arr.phase.append("set next hauptsitz as destination")
+				arr.phase.append("relocate into hauptsitz")
+				arr.phase.append("pick up")
+				arr.phase.append("set next hauptsitz as destination")
+				arr.phase.append("relocate into hauptsitz")
+				arr.phase.append("get reward")
 				arr.phase.append("end of task")
 		
 		reset_phases()
 
 
 	func reset_phases() -> void:
+		arr.path = []
+		
 		for phase in arr.phase:
 			dict.status.phase[phase] = false
 
@@ -132,19 +162,33 @@ class Wohnwagen:
 			if !dict.status.phase[word.phase.current]:
 				break
 		
+		#print(word.phase.current)
+		
 		match word.phase.current:
 			"finding cluster for drill":
 				arr.schedule.append("echo sounding")
-			"relocating into cluster":
+			"relocate into cluster":
 				arr.schedule.append("moving")
-			"entering cluster":
+			"enter cluster":
 				arr.schedule.append("scanning")
-			"developing cluster":
+			"cluster develope":
 				arr.schedule.append("drill manvering")
 			"start stasis":
 				arr.schedule.append("waiting")
+			"relocate into hauptsitz":
+				arr.schedule.append("moving")
+			"anschlagbrett review":
+				arr.schedule.append("anschlagbrett reviewing")
+			"sign abkommen":
+				arr.schedule.append("abkommen signing")
+			"set next hauptsitz as destination":
+				arr.schedule.append("destination updating")
+			"pick up":
+				arr.schedule.append("shipment receipting")
+			"get reward":
+				arr.schedule.append("rewarding")
 			"end of task":
-				set_phases_by_task()
+				end_of_task()
 		
 		follow_schedule()
 
@@ -171,6 +215,16 @@ class Wohnwagen:
 					drill()
 				"waiting":
 					scene.myself.wait()
+				"anschlagbrett reviewing":
+					anschlagbrett_review()
+				"abkommen signing":
+					sign_abkommen()
+				"destination updating":
+					departure()
+				"shipment receipting":
+					get_freight()
+				"rewarding":
+					get_reward()
 			
 			arr.log.append(action)
 			
@@ -263,7 +317,15 @@ class Wohnwagen:
 				var optimal = false
 				
 				for neighbor in obj.gebiet.current.dict.neighbor.keys():
-					if neighbor.obj.wohnwagen == null:
+					if neighbor.obj.hauptsitz != null:
+						if neighbor == obj.gebiet.destination:
+							match word.phase.current:
+								"relocate into hauptsitz":
+									obj.hauptsitz = neighbor.obj.hauptsitz
+									dict.status.phase[word.phase.current] = true
+									follow_phase()
+									return
+					elif neighbor.obj.wohnwagen == null and !arr.path.has(neighbor):
 						var neighbor_direction = obj.gebiet.current.dict.neighbor[neighbor]
 						var neighbor_distance = abs(neighbor_direction.x-main_direction.x)+abs(neighbor_direction.y-main_direction.y)
 						
@@ -404,6 +466,69 @@ class Wohnwagen:
 			follow_phase()
 
 
+	func anschlagbrett_review() -> void:
+		obj.abkommen = obj.hauptsitz.obj.anschlagbrett.arr.abkommen.front()
+		dict.status.phase[word.phase.current] = true
+		follow_phase()
+
+
+	func sign_abkommen() -> void:
+		if obj.hauptsitz.obj.anschlagbrett.arr.abkommen.size() == 0:
+			dict.status.phase[word.phase.current] = true
+		elif obj.hauptsitz.obj.anschlagbrett.arr.abkommen.has(obj.abkommen):
+			obj.hauptsitz.obj.anschlagbrett.arr.abkommen.erase(obj.abkommen)
+			arr.abkommen.append(obj.abkommen)
+			arr.destination.append(obj.abkommen.obj.destination)
+			
+			match word.task:
+				"pick up":
+					arr.destination.append(obj.hauptsitz)
+			
+			dict.status.phase[word.phase.current] = true
+		
+			follow_phase()
+
+
+	func departure() -> void:
+		obj.gebiet.destination = arr.destination.pop_front()
+		obj.hauptsitz = null
+		dict.status.phase[word.phase.current] = true
+		follow_phase()
+
+
+	func get_freight() -> void:
+		dict.status.phase[word.phase.current] = true
+		follow_phase()
+
+
+	func get_reward() -> void:
+		dict.status.phase[word.phase.current] = true
+		follow_phase()
+
+
+	func end_of_task() -> void:
+		match word.task:
+			"dock at hauptsitz":
+				word.task = "hauptsitz walk"
+			"hauptsitz walk":
+				if obj.abkommen == null:
+					word.task = "fall into stasis"
+				else:
+					word.task = obj.abkommen.word.description
+			"deliver":
+				obj.abkommen = null
+				return_to_gewerkschaft()
+			"pick up":
+				obj.abkommen = null
+				return_to_gewerkschaft()
+		
+		word.task = word.task
+		#print("____")
+		#print("new task: ", word.task)
+		#print("____")
+		set_phases_by_task()
+
+
 #Гильдия
 class Zunft:
 	var num = {}
@@ -499,7 +624,7 @@ class Heer:
 
 	func init_zunfts() -> void:
 		arr.zunft = []
-		var n = 1
+		var n = 3
 		
 		for _i in n:
 			var input = {}

@@ -49,6 +49,39 @@ class Erzlager:
 			obj.gebiet.obj.cluster.arr.spilled.erase(obj.gebiet) 
 
 
+#Штаб-квартира
+class Hauptsitz:
+	var obj = {}
+	var scene = {}
+
+
+	func _init(input_):
+		obj.gebiet = input_.gebiet
+		obj.owner = null
+		init_anschlagbrett()
+		init_lagerhaus()
+		init_leiter()
+
+
+	func init_anschlagbrett() -> void:
+		var input = {}
+		input.hauptsitz = self
+		obj.anschlagbrett = Classes_4.Anschlagbrett.new(input)
+
+
+	func init_lagerhaus() -> void:
+		var input = {}
+		input.hauptsitz = self
+		obj.lagerhaus = Classes_4.Lagerhaus.new(input)
+
+
+	func init_leiter() -> void:
+		var input = {}
+		input.hauptsitz = self
+		obj.leiter = Classes_4.Leiter.new(input)
+
+
+
 #Область
 class Gebiet:
 	var num = {}
@@ -70,6 +103,7 @@ class Gebiet:
 		obj.insel = input_.insel
 		obj.cluster = null
 		obj.wohnwagen = null
+		obj.hauptsitz = null
 		flag.on_screen = true
 		color.background = Color()
 		init_scene()
@@ -94,6 +128,18 @@ class Gebiet:
 		
 		for meilenstein in arr.meilenstein:
 			vec.center += meilenstein.vec.position/arr.meilenstein.size()
+
+
+	func get_neighbor_by_direction(direction_) -> Gebiet:
+		var neighbor = self
+		
+		for key in dict.neighbor.keys():
+			if dict.neighbor[key] == direction_:
+				neighbor = key
+				return neighbor
+		
+		print("error get_neighbor_by_direction: no neighbor by this direction_")
+		return neighbor
 
 
 #Кластер
@@ -136,7 +182,7 @@ class Cluster:
 	func clean() -> void:
 		for gebiet in arr.gebiet:
 			gebiet.flag.on_screen = false
-			gebiet.scene.myself.recolor_by_erzlager()
+			gebiet.scene.myself.recolor_by_type("erzlager")
 			
 			for neighbor in gebiet.dict.neighbor.keys():
 				neighbor.dict.neighbor.erase(gebiet)
@@ -155,13 +201,17 @@ class Cluster:
 
 	func paint_gebiets() -> void:
 		for gebiet in arr.gebiet:
-			gebiet.scene.myself.recolor_by_erzlager()
+			gebiet.scene.myself.recolor_by_type("erzlager")
 
 
 	func rng_spill(ejection_) -> void:
 		var rest_ejection = ejection_
 		var gebiets = []
-		gebiets.append_array(arr.gebiet)
+		
+		for gebiet in arr.gebiet:
+			if gebiet.obj.hauptsitz == null:
+				gebiets.append(gebiet)
+		
 		gebiets.shuffle()
 		
 		for gebiet in gebiets:
@@ -169,7 +219,6 @@ class Cluster:
 			var min_ejection = min(0.1*ejection_,rest_ejection)
 			Global.rng.randomize()
 			var flow = Global.rng.randi_range(min_ejection, max_ejection)
-			#print(flow," < ",rest_ejection, " < ", max_ejection)
 			rest_ejection -= flow
 			gebiet.obj.erzlager.add_fossil(flow)
 		
@@ -243,6 +292,7 @@ class Insel:
 		init_meilensteins()
 		init_gebiets()
 		init_clusters()
+		init_hauptsitzs()
 		eruption_of_elements()
 
 
@@ -278,7 +328,6 @@ class Insel:
 			
 			for _j in Global.num.meilenstein.cols:
 				vec.x += Global.num.insel.w
-				
 				var input = {}
 				input.position = vec
 				input.grid = Vector2(_j,_i)
@@ -431,7 +480,6 @@ class Insel:
 		if datas.size() > 0:
 			datas.sort_custom(func(a, b): return a.neighbors < b.neighbors)
 			var options = []
-			#print(datas.front().neighbors, "   ",datas.size())
 			
 			for data in datas:
 				if data.neighbors == datas.front().neighbors:
@@ -504,15 +552,8 @@ class Insel:
 				
 				if seconds.size() > 0:
 					var second = Global.get_random_element(seconds)
-					#print(second)
 					var pair = [first, second]
 					add_cluster_by_pair(pair)
-					
-					#pair.front().color.background = Color("green")
-					#pair.front().scene.myself.recolor(pair.front().color.background)
-					#pair.back().color.background = Color("blue")
-					#pair.back().scene.myself.recolor(pair.back().color.background)
-					#print(arr.cluster.back().arr.neighbor.size(), " ", arr.cluster.back().arr.gebiet.size())
 					unenclouded_.append(arr.cluster.back())
 				else:
 					unenclouded_.pop_front()
@@ -535,7 +576,7 @@ class Insel:
 			for gebiet in gebiets:
 				if gebiet.obj.cluster == null:
 					gebiet.flag.on_screen = false
-					gebiet.scene.myself.recolor_by_erzlager()
+					gebiet.scene.myself.recolor_by_type("erzlager")
 					
 					for neighbor in gebiet.dict.neighbor.keys():
 						neighbor.dict.neighbor.erase(gebiet)
@@ -562,6 +603,35 @@ class Insel:
 			
 			cluster.word.element = Global.get_random_element(elements)
 			cluster.set_gebiet_elements()
+
+
+	func init_hauptsitzs() -> void:
+		arr.hauptsitz = {}
+		arr.hauptsitz.gewerkschaft = [] 
+		arr.hauptsitz.hafen = []
+		var directions = 6
+		var far_away = Global.num.insel.rings/2
+		var owners = []
+		
+		for _i in directions:
+			owners.append(str(_i))
+			var gebiet = arr.gebiet[arr.gebiet.size()/2][arr.gebiet.size()/2]
+			
+			for _j in far_away:
+				var direction = Global.arr.neighbor[gebiet.num.parity][_i]
+				
+				gebiet = gebiet.get_neighbor_by_direction(direction)
+			
+			var input = {}
+			input.gebiet = gebiet
+			input.owner = owners[_i]
+			gebiet.obj.hauptsitz = Classes_0.Hauptsitz.new(input)
+			
+			if _i % 2 == 0:
+				arr.hauptsitz.gewerkschaft.append(gebiet.obj.hauptsitz)
+			else:
+				arr.hauptsitz.hafen.append(gebiet.obj.hauptsitz)
+				gebiet.scene.myself.add_hauptsitz()
 
 
 	func eruption_of_elements() -> void:
@@ -622,8 +692,6 @@ class Insel:
 	
 		for element in ejections.keys():
 			ejections[element] = float(ejections[element])/total_ejection
-		
-		#print(ejections)
 
 
 	func get_clusters_around_cluster(cluster_, rings_) -> Array:
@@ -649,8 +717,6 @@ class Insel:
 		
 		if percent < num.fossil.eruption:
 			eruption_of_elements()
-		
-		print(percent)
 
 
 
