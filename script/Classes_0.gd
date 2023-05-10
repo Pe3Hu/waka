@@ -66,19 +66,19 @@ class Hauptsitz:
 	func init_anschlagbrett() -> void:
 		var input = {}
 		input.hauptsitz = self
-		obj.anschlagbrett = Classes_4.Anschlagbrett.new(input)
+		obj.anschlagbrett = Classes_3.Anschlagbrett.new(input)
 
 
 	func init_lagerhaus() -> void:
 		var input = {}
 		input.hauptsitz = self
-		obj.lagerhaus = Classes_4.Lagerhaus.new(input)
+		obj.lagerhaus = Classes_3.Lagerhaus.new(input)
 
 
 	func init_leiter() -> void:
 		var input = {}
 		input.hauptsitz = self
-		obj.leiter = Classes_4.Leiter.new(input)
+		obj.leiter = Classes_3.Leiter.new(input)
 
 
 

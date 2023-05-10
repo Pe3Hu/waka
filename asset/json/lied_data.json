@@ -1,183 +1,183 @@
 [
  {
   "name": "Sleep",
-  "masters": 1,
-  "servants": 0,
+  "servants": 1,
+  "masters": 0,
   "pureblood": 0,
   "hierarchy": 0
  },
  {
   "name": "Flirt",
-  "masters": 2,
-  "servants": 0,
+  "servants": 2,
+  "masters": 0,
   "pureblood": 0,
   "hierarchy": 0
  },
  {
   "name": "Gossip",
-  "masters": 3,
-  "servants": 0,
+  "servants": 3,
+  "masters": 0,
   "pureblood": 0,
   "hierarchy": 0
  },
  {
   "name": "Law",
-  "masters": 4,
-  "servants": 0,
+  "servants": 4,
+  "masters": 0,
   "pureblood": 0,
   "hierarchy": 0
  },
  {
   "name": "Trade",
-  "masters": 5,
-  "servants": 0,
+  "servants": 5,
+  "masters": 0,
   "pureblood": 0,
   "hierarchy": 0
  },
  {
   "name": "Feast",
-  "masters": 6,
-  "servants": 0,
+  "servants": 6,
+  "masters": 0,
   "pureblood": 0,
   "hierarchy": 0
  },
  {
   "name": "Fight",
-  "masters": 7,
-  "servants": 0,
+  "servants": 7,
+  "masters": 0,
   "pureblood": 0,
   "hierarchy": 0
  },
  {
   "name": "Pack",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 3,
   "hierarchy": 0
  },
  {
   "name": "Family",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 4,
   "hierarchy": 0
  },
  {
   "name": "Kin",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 5,
   "hierarchy": 0
  },
  {
   "name": "Dynasty",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 6,
   "hierarchy": 0
  },
  {
   "name": "Pantheon",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 7,
   "hierarchy": 0
  },
  {
   "name": "Peasants",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 0,
   "hierarchy": 3
  },
  {
   "name": "Artisans",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 0,
   "hierarchy": 4
  },
  {
   "name": "Guards",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 0,
   "hierarchy": 5
  },
  {
   "name": "Merchants",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 0,
   "hierarchy": 6
  },
  {
   "name": "Monarchs",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 0,
   "hierarchy": 7
  },
  {
   "name": "Barony",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 3,
   "hierarchy": 3
  },
  {
   "name": "Countship",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 4,
   "hierarchy": 4
  },
  {
   "name": "Dukedom",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 5,
   "hierarchy": 5
  },
  {
   "name": "Kingdom",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 6,
   "hierarchy": 6
  },
  {
   "name": "Empire",
-  "masters": 0,
   "servants": 0,
+  "masters": 0,
   "pureblood": 7,
   "hierarchy": 7
  },
  {
   "name": "Wedding",
-  "masters": 2,
   "servants": 2,
+  "masters": 2,
   "pureblood": 0,
   "hierarchy": 0
  },
  {
   "name": "Tournament",
-  "masters": 3,
   "servants": 2,
+  "masters": 3,
   "pureblood": 0,
   "hierarchy": 0
  },
  {
   "name": "Plague",
-  "masters": 3,
   "servants": 3,
+  "masters": 3,
   "pureblood": 0,
   "hierarchy": 0
  },
  {
   "name": "Revolution",
-  "masters": 4,
   "servants": 3,
+  "masters": 4,
   "pureblood": 0,
   "hierarchy": 0
  }

@@ -18,12 +18,12 @@ config/icon="res://icon.svg"
 [autoload]
 
 Global="*res://script/Global.gd"
+Classes_0="*res://script/Classes_0.gd"
 Classes_1="*res://script/Classes_1.gd"
 Classes_2="*res://script/Classes_2.gd"
 Classes_3="*res://script/Classes_3.gd"
 Classes_4="*res://script/Classes_4.gd"
 Classes_5="*res://script/Classes_5.gd"
-Classes_0="*res://script/Classes_0.gd"
 Classes_6="*res://script/Classes_6.gd"
 
 [display]

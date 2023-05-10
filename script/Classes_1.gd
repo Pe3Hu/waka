@@ -89,7 +89,7 @@ class Wohnwagen:
 	func init_archivar() -> void:
 		var input = {}
 		input.wohnwagen = self
-		obj.archivar = Classes_2.Archivar.new(input)
+		obj.archivar = Classes_4.Archivar.new(input)
 
 
 	func add_wagen(wagen_) -> void:
@@ -114,7 +114,7 @@ class Wohnwagen:
 		
 		match word.task:
 			"mineral extraction":
-				arr.phase.append("finding cluster for drill")
+				arr.phase.append("searching cluster for drill")
 				arr.phase.append("relocate into cluster")
 				arr.phase.append("enter cluster")
 				arr.phase.append("cluster develope")
@@ -142,6 +142,12 @@ class Wohnwagen:
 				arr.phase.append("relocate into hauptsitz")
 				arr.phase.append("get reward")
 				arr.phase.append("end of task")
+			"piracy":
+				arr.phase.append("searching for a robbery victim")
+				arr.phase.append("relocate into verfolgung")
+				arr.phase.append("prosecute")
+				arr.phase.append("catch inspection")
+				arr.phase.append("end of task")
 		
 		reset_phases()
 
@@ -165,7 +171,7 @@ class Wohnwagen:
 		#print(word.phase.current)
 		
 		match word.phase.current:
-			"finding cluster for drill":
+			"searching cluster for drill":
 				arr.schedule.append("echo sounding")
 			"relocate into cluster":
 				arr.schedule.append("moving")

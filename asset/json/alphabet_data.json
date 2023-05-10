@@ -7,7 +7,8 @@
   "debuff": 4,
   "price": 10,
   "tempo": 8,
-  "chaos": 6
+  "chaos": 6,
+  "tint": "red"
  },
  {
   "sin": "Pride",
@@ -17,7 +18,8 @@
   "debuff": 6,
   "price": 1,
   "tempo": 10,
-  "chaos": 8
+  "chaos": 8,
+  "tint": "orange"
  },
  {
   "sin": "Greed",
@@ -27,7 +29,8 @@
   "debuff": 12,
   "price": 15,
   "tempo": 1,
-  "chaos": 8
+  "chaos": 8,
+  "tint": "yellow"
  },
  {
   "sin": "Lust",
@@ -37,7 +40,8 @@
   "debuff": 8,
   "price": 6,
   "tempo": 6,
-  "chaos": 15
+  "chaos": 15,
+  "tint": "green"
  },
  {
   "sin": "Sloth",
@@ -47,7 +51,8 @@
   "debuff": 15,
   "price": 4,
   "tempo": 12,
-  "chaos": 8
+  "chaos": 8,
+  "tint": "blue"
  },
  {
   "sin": "Gluttony",
@@ -57,7 +62,8 @@
   "debuff": 1,
   "price": 8,
   "tempo": 15,
-  "chaos": 6
+  "chaos": 6,
+  "tint": "indigo"
  },
  {
   "sin": "Envy",
@@ -67,6 +73,7 @@
   "debuff": 10,
   "price": 12,
   "tempo": 4,
-  "chaos": 8
+  "chaos": 8,
+  "tint": "violet"
  }
 ]

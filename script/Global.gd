@@ -32,7 +32,7 @@ func init_num() -> void:
 	
 	num.lied = {}
 	num.lied.min_size = {}
-	num.lied.min_size.masters = 1
+	num.lied.min_size.servants = 1
 	num.lied.min_size.hierarchy = 3
 	num.lied.min_size.pureblood = 3
 	
@@ -179,10 +179,10 @@ func init_sin() -> void:
 		var data = {}
 
 		for key in alphabet.keys():
-			if key != "sin" && alphabet[key] > 0:
+			if key != "sin":
 				data[key] = alphabet[key]
 				
-				if !dict.alphabet.parameter.has(key):
+				if !dict.alphabet.parameter.has(key) and key != "tint":
 					dict.alphabet.parameter.append(key)
 		
 		dict.alphabet.sin[alphabet["sin"]] = data
@@ -199,7 +199,7 @@ func init_lied() -> void:
 		var data = {}
 
 		for key in lied.keys():
-			if key != "name" && lied[key] > 0:
+			if key != "name" and lied[key] > 0:
 				data[key] = lied[key]
 				
 				if !dict.lied.parameter.keys().has(key):
@@ -244,7 +244,7 @@ func init_karkasse() -> void:
 		var data = {}
 
 		for key in karkasse.keys():
-			if key != "nickname" && karkasse[key] > 0:
+			if key != "nickname" and karkasse[key] > 0:
 				data[key] = karkasse[key]
 			
 		if !dict.karkasse.prices.has(karkasse["price"]):
@@ -259,7 +259,6 @@ func init_karkasse() -> void:
 		var rarity = dict.karkasse.prices.find(dict.karkasse.nickname[nickname]["price"])
 		var degree = rarity
 		karkasse.rarity = pow(rarity+1,degree)
-		print()
 
 
 func init_modul() -> void:
@@ -506,11 +505,11 @@ func fill_ethnography_parameters(obj_, runes_: Array) -> void:
 		var powers = []
 		
 		for rune in runes_:
-			if obj_.dict.ethnography["masters"].keys().has(rune.num.power):
-				obj_.dict.ethnography["masters"][rune.num.power].append(rune)
+			if obj_.dict.ethnography["servants"].keys().has(rune.num.density):
+				obj_.dict.ethnography["servants"][rune.num.density].append(rune)
 			else:
-				obj_.dict.ethnography["masters"][rune.num.power] = [rune]
-				powers.append(rune.num.power)
+				obj_.dict.ethnography["servants"][rune.num.density] = [rune]
+				powers.append(rune.num.density)
 			
 			if obj_.dict.ethnography["pureblood"].keys().has(rune.word.abbreviation):
 				obj_.dict.ethnography["pureblood"][rune.word.abbreviation].append(rune)
@@ -577,7 +576,7 @@ func get_all_subparts(array_: Array, subpart_sizes_: Array, parametr_: String):
 				subpart.append(perm[_i])
 			
 			match parametr_:
-				"masters":
+				"servants":
 					subpart.sort_custom(func(a, b): return a.num.index > b.num.index)
 				"pureblood":
 					subpart.sort_custom(func(a, b): return a.num.index > b.num.index)
