@@ -9,8 +9,8 @@ func _ready() -> void:
 	Global.obj.verfolgung = Classes_6.Verfolgung.new()
 	var wohnwagen = Global.obj.heer.arr.zunft.front().arr.wohnwagen.front()
 	Global.obj.verfolgung.add_chaser(wohnwagen)
-	Global.obj.verfolgung.next_distribution()
-	Global.obj.verfolgung.next_distribution()
+	Global.obj.verfolgung.run_races()
+	#Global.obj.verfolgung.next_distribution()
 	#Global.obj.verfolgung.add_chaser()
 	
 #	datas.sort_custom(func(a, b): return a.value < b.value) 012

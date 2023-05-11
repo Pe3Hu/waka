@@ -160,7 +160,6 @@ class Alphabet:
 
 	func _init(input_) -> void:
 		word.tint = input_.tint
-		num.density = input_.density
 		obj.lexikon = input_.lexikon
 		init_runes()
 
@@ -168,7 +167,7 @@ class Alphabet:
 	func init_runes() -> void:
 		arr.rune = []
 		
-		for density in num.density:
+		for density in obj.lexikon.arr.density:
 			var input = {}
 			input.alphabet = self
 			input.tint = word.tint
@@ -188,20 +187,17 @@ class Lexikon:
 
 
 	func init_alphabets() -> void:
-		var max_density = 9
 		arr.alphabet = []
 		arr.tint = []
 		arr.density = []
 		
-		for density in max_density:
-			arr.density = [density]
-			
+		for density in range(1,Global.num.rune.density+1,1):
+			arr.density.append(density)
 		
 		for sin in Global.dict.alphabet.sin.keys():
 			var input = {}
 			input.lexikon = self
 			input.tint = Global.dict.alphabet.sin[sin].tint
-			input.density = max_density
 			var alphabet = Classes_5.Alphabet.new(input)
 			arr.alphabet.append(alphabet)
 			arr.tint.append(input.tint)

@@ -42,7 +42,7 @@ class Chronik:
 			arr.rune.archive.shuffle()
 			fill_insight()
 		
-		print(">>> ",arr.rune.insight.front())
+		#print(">>> ",arr.rune.insight.front())
 		var space_left = obj.archivar.num.memory-arr.rune.thought.size()
 		var novelty = min(space_left, obj.archivar.num.intellect)
 		
@@ -62,7 +62,6 @@ class Chronik:
 		var rune = arr.rune.insight.pop_front()
 		arr.rune.thought.append(rune)
 		obj.archivar.dict.preference.unspoiled.tint[rune.word.tint].erase(rune)
-		var a = obj.archivar.dict.preference.unspoiled.density
 		obj.archivar.dict.preference.unspoiled.density[rune.num.density].erase(rune)
 
 
@@ -199,6 +198,20 @@ class Chronik:
 		arr.rune.memoir.append(rune_)
 
 
+	func reset_runes() -> void:
+		while arr.rune.insight.size() > 0:
+			pull_rune_from_insight()
+		
+		while arr.rune.thought.size() > 0:
+			var rune = arr.rune.thought.pop_front()
+			play_rune(rune)
+		
+		arr.rune.archive.append_array(arr.rune.memoir)
+		arr.rune.memoir = []
+		obj.archivar.reset_unspoiled()
+		obj.archivar.dict.preference.runes = {}
+
+
 #Архивариус
 class Archivar:
 	var dict = {}
@@ -241,7 +254,16 @@ class Archivar:
 
 	func set_preference(preference_) -> void:
 		dict.preference.parametr = preference_
+		num.imba = null
 		reset_unspoiled()
+		
+		match dict.preference.parametr:
+			"servants":
+				num.imba = Global.dict.alphabet.sin.keys().size()
+			"pureblood":
+				num.imba = Global.num.rune.density
+			"hierarchy":
+				num.imba = Global.num.rune.density
 
 
 	func reset_unspoiled() -> void:
@@ -261,18 +283,9 @@ class Archivar:
 				dict.preference.unspoiled.density[rune.num.density].append(rune)
 
 
-	func follow_preference() -> void:
+	func follow_preference() -> bool:
 		set_best_entwurfs()
-		check_imba()
-		var runes = []
-		
-		for rune in dict.preference.runes.keys():
-			var text = rune.word.abbreviation+str(rune.num.density)+"| "+str(dict.preference.runes[rune].size())
-			runes.append(text)
-			#print(rune.word.abbreviation, rune.num.density, "| ",dict.preference.runes[rune].size())
-		
-		print(runes)
-		print("______")
+		return check_imba()
 
 
 	func set_best_entwurfs() -> void:
@@ -286,13 +299,8 @@ class Archivar:
 						dict.preference.runes[rune] = entwurf.dict.ethnography[dict.preference.parametr]
 
 
-	func check_imba() -> void:
-		var imba = null
+	func check_imba() -> bool:
 		var combinations = []
-		
-		match dict.preference.parametr:
-			"servants":
-				imba = Global.dict.alphabet.sin.keys().size()
 		
 		for rune in dict.preference.runes.keys():
 			if !combinations.has(dict.preference.runes[rune]) and dict.preference.runes[rune].size() > 0:
@@ -300,13 +308,37 @@ class Archivar:
 		
 		combinations.sort_custom(func(a, b): return a.size() < b.size())
 		
-		if combinations.back().size() == imba:
-			print("> imba <")
+		if combinations.back().size() == num.imba:
+			if Global.stats.keys().has(dict.preference.parametr):
+				if Global.stats[dict.preference.parametr].keys().has(num.imba):
+					Global.stats[dict.preference.parametr][num.imba].append(obj.wohnwagen.obj.verfolgung.num.round.current)
+				else:
+					Global.stats[dict.preference.parametr][num.imba] = [obj.wohnwagen.obj.verfolgung.num.round.current]
+			else:
+				Global.stats[dict.preference.parametr] = {}
+				Global.stats[dict.preference.parametr][num.imba] = [obj.wohnwagen.obj.verfolgung.num.round.current]
+			obj.wohnwagen.obj.verfolgung.reset()
 		else:
 			jettison(combinations)
+		
+		
+		var runes = []
+		
+		for rune in dict.preference.runes.keys():
+			var text = rune.word.abbreviation+str(rune.num.density)+"| "+str(dict.preference.runes[rune].size())
+			runes.append(text)
+			#print(rune.word.abbreviation, rune.num.density, "| ",dict.preference.runes[rune].size())
+		
+		print(runes)
+		print("___",obj.wohnwagen.obj.verfolgung.num.round.current,"___")
+		
+		return combinations.back().size() == num.imba
 
 
 	func jettison(combinations_: Array) -> void:
+		while combinations_.has([]):
+			combinations_.erase([])
+		
 		if combinations_.size() != 1:
 			var available_space = num.memory-obj.chronik.arr.rune.thought.size()
 			var ballast = max(0,num.intellect-available_space)
@@ -342,48 +374,3 @@ class Archivar:
 			
 			if ballast > 0:
 				jettison(combinations_)
-
-
-	func old_jettison(combinations_: Array) -> void:
-		if combinations_.size() > 1:
-			var available_space = num.memory-obj.chronik.arr.rune.thought.size()
-			var ballast = max(0,num.intellect-available_space)
-			#for key in dict.preference.unspoiled.keys():
-			#	for key_ in dict.preference.unspoiled[key]:
-			#		print(key_, dict.preference.unspoiled[key][key_].size())
-			
-			while ballast > 0:
-				var datas = []
-				
-				for rune in dict.preference.runes.keys():
-					if combinations_.front().size() == dict.preference.runes[rune].size():
-						var data = {}
-						data.rune = rune
-						
-						match dict.preference.parametr:
-							"servants":
-								data.unspoiled = dict.preference.unspoiled.density[rune.num.density].size()
-						
-						datas.append(data)
-				
-				datas.sort_custom(func(a, b): return a.unspoiled < b.unspoiled)
-				var options = []
-				
-				for data in datas:
-					if data.unspoiled == datas.front().unspoiled:
-						options.append(data.rune)
-				
-				if options.size() > 0:
-					var rune = Global.get_random_element(options)
-					
-					if dict.preference.runes[rune].size() != combinations_.back().size():
-						rune.crease(obj.chronik)
-					
-					ballast -= 1
-				else:
-					break
-			
-			if ballast > 0:
-				jettison(combinations_)
-
-

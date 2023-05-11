@@ -10,6 +10,7 @@ var node = {}
 var flag = {}
 var vec = {}
 var scene = {}
+var stats = {}
 
 
 func init_num() -> void:
@@ -62,6 +63,9 @@ func init_num() -> void:
 	num.modul.weight.modul["spear"] = 1250
 	num.modul.weight.modul["shield"] = 1250
 	num.modul.weight.rank = 0.25
+	
+	num.rune = {}
+	num.rune.density = 7
 
 
 func init_module_prices() -> void:

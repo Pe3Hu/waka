@@ -72,6 +72,7 @@ class Wohnwagen:
 		obj.cluster = {}
 		obj.cluster.destination = null
 		obj.abkommen = null
+		obj.verfolgung = null
 
 
 	func init_scene() -> void:
