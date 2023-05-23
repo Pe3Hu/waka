@@ -1,3 +1,9 @@
+Polygon2D
+CollisionShape2D
+CharacterBody2D
+StaticBody2D
+RigidBody2D
+Node2D
 Timer
 VBoxContainer
 ColorRect
@@ -7,8 +13,6 @@ HBoxContainer
 Button
 ProgressBar
 TextureProgressBar
-Polygon2D
-Node2D
 Sprite2D
 TextureRect
 TileMap

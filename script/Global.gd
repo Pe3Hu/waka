@@ -15,89 +15,11 @@ var stats = {}
 
 func init_num() -> void:
 	num.index = {}
-	num.index.rune = 0
 	
-	num.insel = {}
-	num.insel.rings = 25
-	num.insel.sectors = 3
-	num.insel.boundary = 3
-	num.insel.a = 10
-	num.insel.h = 2*num.insel.a
-	num.insel.w = sqrt(3)*num.insel.a
-	num.insel.neighbors = 6
-	
-	num.meilenstein = {}
-	num.meilenstein.n = num.insel.rings*2-1
-	num.meilenstein.rows = 4+(num.meilenstein.n-1)*2
-	num.meilenstein.cols = 1+num.meilenstein.n
-	
-	num.lied = {}
-	num.lied.min_size = {}
-	num.lied.min_size.servants = 1
-	num.lied.min_size.hierarchy = 3
-	num.lied.min_size.pureblood = 3
-	
-	num.title = {}
-	num.title.max_size = 20
-	
-	num.modul = {}
-	num.modul.indicator = {}
-	num.modul.indicator[0] = {}
-	num.modul.indicator[0].basis = 10
-	num.modul.indicator[0].deviation = 3
-	num.modul.indicator[1] = {}
-	num.modul.indicator[1].basis = 12
-	num.modul.indicator[1].deviation = 4
-	num.modul.indicator[2] = {}
-	num.modul.indicator[2].basis = 15
-	num.modul.indicator[2].deviation = 5
-	
-	init_module_prices()
-	
-	num.modul.weight = {}
-	num.modul.weight.modul = {}
-	num.modul.weight.modul["motor"] = 1500
-	num.modul.weight.modul["locator"] = 800
-	num.modul.weight.modul["handler"] = 1000
-	num.modul.weight.modul["packer"] = 750
-	num.modul.weight.modul["spear"] = 1250
-	num.modul.weight.modul["shield"] = 1250
-	num.modul.weight.rank = 0.25
-	
-	num.rune = {}
-	num.rune.density = 7
-
-
-func init_module_prices() -> void:
-	num.modul.price = {}
-	num.modul.price.rank = {}
-	num.modul.price.rank[0] = 100
-	num.modul.price.rank[1] = 125
-	num.modul.price.rank[2] = 175
-	num.modul.price.deviation = {}
-	
-	var max_deviation = 0
-	
-	for rank in num.modul.indicator.keys():
-		if max_deviation < num.modul.indicator[rank].deviation:
-			max_deviation = num.modul.indicator[rank].deviation
-	
-	var prices = []
-	var price = -1
-	var step = 11
-	
-	for _i in max_deviation:
-		price += step
-		prices.append(price)
-		step += 1
-	
-	prices.push_front(0)
-	
-	for _i in prices.size():
-		num.modul.price.deviation[_i] = prices[_i]
-		
-		if _i != 0:
-			num.modul.price.deviation[-_i] = -prices[_i]
+	num.bienenstock = {}
+	num.bienenstock.speed = {}
+	num.bienenstock.speed.min = 300
+	num.bienenstock.speed.max = 400
 
 
 func init_dict() -> void:
@@ -144,84 +66,6 @@ func init_dict() -> void:
 			Vector2( 0,-1)
 		]
 	]
-	dict.element = {}
-	dict.element.antipode = {
-		"Aqua": "Fire",
-		"Wind": "Earth",
-		"Fire": "Aqua",
-		"Earth": "Wind",
-		"Halo": "Dark",
-		"Dark": "Halo"
-	}
-	
-	var max_hue = 360.0
-	
-	dict.element.hue = {
-		"Fire": 350/max_hue,
-		"Wind": 180/max_hue,
-		"Aqua": 220/max_hue,
-		"Earth": 100/max_hue,
-		"Halo": 60/max_hue,
-		"Dark": 290/max_hue,
-	}
-	
-	init_sin()
-	init_lied()
-	init_title()
-	init_karkasse()
-	init_modul()
-
-
-func init_sin() -> void:
-	dict.alphabet = {}
-	var path = "res://asset/json/alphabet_data.json"
-	var array = load_data(path)
-	dict.alphabet.sin = {}
-	dict.alphabet.parameter = []
-	
-	for alphabet in array:
-		var data = {}
-
-		for key in alphabet.keys():
-			if key != "sin":
-				data[key] = alphabet[key]
-				
-				if !dict.alphabet.parameter.has(key) and key != "tint":
-					dict.alphabet.parameter.append(key)
-		
-		dict.alphabet.sin[alphabet["sin"]] = data
-
-
-func init_lied() -> void:
-	dict.lied = {}
-	var path = "res://asset/json/lied_data.json"
-	var array = load_data(path)
-	dict.lied.name = {}
-	dict.lied.parameter = {}
-	
-	for lied in array:
-		var data = {}
-
-		for key in lied.keys():
-			if key != "name" and lied[key] > 0:
-				data[key] = lied[key]
-				
-				if !dict.lied.parameter.keys().has(key):
-					dict.lied.parameter[key] = {}
-		
-		dict.lied.name[lied["name"]] = data
-		
-	
-	for key in dict.lied.name.keys():
-		var lied = dict.lied.name[key]
-		
-		for parameter in lied.keys():
-			var size = int(lied[parameter])
-			
-			if dict.lied.parameter[parameter].has(size):
-				dict.lied.parameter[parameter][size].append(key)
-			else:
-				dict.lied.parameter[parameter][size] = [key]
 
 
 func init_title() -> void:
@@ -237,65 +81,7 @@ func init_title() -> void:
 			dict.title[key].append(dict_[key])
 
 
-func init_karkasse() -> void:
-	dict.karkasse = {}
-	var path = "res://asset/json/karkasse_data.json"
-	var array = load_data(path)
-	dict.karkasse.nickname = {}
-	dict.karkasse.prices = []
-	
-	for karkasse in array:
-		var data = {}
-
-		for key in karkasse.keys():
-			if key != "nickname" and karkasse[key] > 0:
-				data[key] = karkasse[key]
-			
-		if !dict.karkasse.prices.has(karkasse["price"]):
-			dict.karkasse.prices.append(karkasse["price"])
-		
-		dict.karkasse.nickname[karkasse["nickname"]] = data
-	
-	dict.karkasse.prices.sort_custom(func(a, b): return a > b)
-	
-	for nickname in dict.karkasse.nickname:
-		var karkasse = dict.karkasse.nickname[nickname]
-		var rarity = dict.karkasse.prices.find(dict.karkasse.nickname[nickname]["price"])
-		var degree = rarity
-		karkasse.rarity = pow(rarity+1,degree)
-
-
-func init_modul() -> void:
-	dict.modul = {}
-	dict.modul.aspect = {}
-	dict.modul.aspect["speed"] = "motor"
-	dict.modul.aspect["drill"] = "motor"
-	dict.modul.aspect["radar"] = "locator"
-	dict.modul.aspect["jewellery"] = "locator"
-	dict.modul.aspect["memory"] = "handler"
-	dict.modul.aspect["intellect"] = "handler"
-	dict.modul.aspect["price"] = "handler"
-	dict.modul.aspect["cargo"] = "packer"
-	dict.modul.aspect["tempo"] = "packer"
-	dict.modul.aspect["attack"] = "spear"
-	dict.modul.aspect["debuff"] = "spear"
-	dict.modul.aspect["defense"] = "shield"
-	dict.modul.aspect["buff"] = "shield"
-	
-	arr.modul = []
-	
-	for key in dict.modul.aspect.keys():
-		var modul = dict.modul.aspect[key]
-		
-		if !arr.modul.has(modul):
-			arr.modul.append(modul)
-
-
 func init_arr() -> void:
-	arr.color = ["Red","Green","Blue","Yellow"]
-	arr.element = ["Aqua","Wind","Fire","Earth","Halo","Dark"]
-	arr.title = []
-	
 	arr.neighbor = [
 		[
 			Vector2( 1,-1), 
@@ -314,7 +100,6 @@ func init_arr() -> void:
 			Vector2(-1,-1)
 		]
 	]
-	
 	arr.spin = [
 		[
 			Vector2( 1,-1), 
@@ -333,6 +118,7 @@ func init_arr() -> void:
 			Vector2( 0,-1)
 		]
 	]
+	arr.side = ["top","right","bot","left"]
 
 
 func init_node() -> void:
@@ -340,23 +126,16 @@ func init_node() -> void:
 
 
 func init_scene() -> void:
-	scene.insel = load("res://scene/0/insel.tscn")
-	scene.gebiet = load("res://scene/0/gebiet.tscn")
-	scene.heer = load("res://scene/1/Heer.tscn")
-	scene.wohnwagen = load("res://scene/1/wohnwagen.tscn")
-	scene.trailer = load("res://scene/1/trailer.tscn")
+	scene.fechten = load("res://scene/0/fechten.tscn")
+	scene.biene = load("res://scene/1/biene.tscn")
+	scene.bienenstock = load("res://scene/1/bienenstock.tscn")
+	scene.feramon = load("res://scene/2/feramon.tscn")
+	
 
 
 func init_vec():
 	vec.size = {}
-	vec.offset = {}
 	init_window_size()
-	
-	vec.offset.insel = vec.size.window.center
-	vec.offset.insel.y -= Global.num.insel.h/2
-	vec.offset.insel.x -= Global.num.insel.w
-	vec.offset.insel.x -= (num.meilenstein.rows-1)*num.insel.w / 4
-	vec.offset.insel.y -= (num.meilenstein.cols+0.5*(num.meilenstein.n-1))*num.insel.h / 4
 
 
 func init_window_size():
@@ -474,73 +253,6 @@ func from_weight_to_percentage(dict_: Dictionary) -> Dictionary:
 		result[key] = round(float(dict_[key])/total*100)
 	
 	return result
-
-
-func generate_unique_title(type_: String) -> String:
-	var title = generate_title(type_)
-	
-	while arr.title.has(title) or num.title.max_size < title.length():
-		title = generate_title(type_)
-	
-	return title
-
-
-func generate_title(type_: String) -> String:
-	var title = ""
-	
-	if dict.title.keys().has(type_):
-		dict.title = get_random_element(dict.title[type_])
-	else:
-		match type_:
-			"Intro+Outro":
-				var intro = get_random_element(dict.title["Intro"])
-				var outro = get_random_element(dict.title["Outro"])
-				title = intro + " " + outro
-	
-	return title
-
-
-func fill_ethnography_parameters(obj_, runes_: Array) -> void:
-		obj_.dict.ethnography = {}
-		
-		for parameter in Global.dict.lied.parameter:
-			obj_.dict.ethnography[parameter] = {}
-			
-		var powers = []
-		
-		for rune in runes_:
-			if obj_.dict.ethnography["servants"].keys().has(rune.num.density):
-				obj_.dict.ethnography["servants"][rune.num.density].append(rune)
-			else:
-				obj_.dict.ethnography["servants"][rune.num.density] = [rune]
-				powers.append(rune.num.density)
-			
-			if obj_.dict.ethnography["pureblood"].keys().has(rune.word.abbreviation):
-				obj_.dict.ethnography["pureblood"][rune.word.abbreviation].append(rune)
-			else:
-				obj_.dict.ethnography["pureblood"][rune.word.abbreviation] = [rune]
-		
-		powers.sort()
-		
-		while powers.size() > 0:
-			var power = powers.pop_front()
-			obj_.dict.ethnography["hierarchy"][power] = [power]
-			
-			if powers.size() > 0:
-				var next_power = powers.pop_front()
-				
-				while next_power == obj_.dict.ethnography["hierarchy"][power].back()+1:
-					obj_.dict.ethnography["hierarchy"][power].append(next_power)
-					next_power = powers.pop_front()
-					
-				powers.push_front(next_power)
-		
-		for parameter in obj_.dict.ethnography.keys():
-			for _i in range(obj_.dict.ethnography[parameter].keys().size()-1,-1,-1):
-				var key = obj_.dict.ethnography[parameter].keys()[_i]
-				
-				if obj_.dict.ethnography[parameter][key].size() < Global.num.lied.min_size[parameter]:
-					obj_.dict.ethnography[parameter].erase(key)
 
 
 func get_all_substitution(array_: Array):
