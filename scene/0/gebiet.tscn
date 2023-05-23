@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ca3utxi5ecvec"]
+
+[ext_resource type="Script" path="res://scene/0/gebiet.gd" id="1_eggrd"]
+
+[node name="Gebiet" type="Polygon2D"]
+script = ExtResource("1_eggrd")

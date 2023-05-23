@@ -1,0 +1,79 @@
+[
+ {
+  "sin": "Wrath",
+  "attack": 15,
+  "defense": 1,
+  "buff": 12,
+  "debuff": 4,
+  "price": 10,
+  "tempo": 8,
+  "chaos": 6,
+  "tint": "red"
+ },
+ {
+  "sin": "Pride",
+  "attack": 12,
+  "defense": 4,
+  "buff": 15,
+  "debuff": 6,
+  "price": 1,
+  "tempo": 10,
+  "chaos": 8,
+  "tint": "orange"
+ },
+ {
+  "sin": "Greed",
+  "attack": 10,
+  "defense": 6,
+  "buff": 4,
+  "debuff": 12,
+  "price": 15,
+  "tempo": 1,
+  "chaos": 8,
+  "tint": "yellow"
+ },
+ {
+  "sin": "Lust",
+  "attack": 8,
+  "defense": 8,
+  "buff": 8,
+  "debuff": 8,
+  "price": 6,
+  "tempo": 6,
+  "chaos": 15,
+  "tint": "green"
+ },
+ {
+  "sin": "Sloth",
+  "attack": 6,
+  "defense": 10,
+  "buff": 1,
+  "debuff": 15,
+  "price": 4,
+  "tempo": 12,
+  "chaos": 8,
+  "tint": "blue"
+ },
+ {
+  "sin": "Gluttony",
+  "attack": 4,
+  "defense": 12,
+  "buff": 10,
+  "debuff": 1,
+  "price": 8,
+  "tempo": 15,
+  "chaos": 6,
+  "tint": "indigo"
+ },
+ {
+  "sin": "Envy",
+  "attack": 1,
+  "defense": 15,
+  "buff": 6,
+  "debuff": 10,
+  "price": 12,
+  "tempo": 4,
+  "chaos": 8,
+  "tint": "violet"
+ }
+]

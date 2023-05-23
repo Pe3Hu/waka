@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3 uid="uid://b3r6w273afpcv"]
+
+[ext_resource type="Script" path="res://scene/1/trailer.gd" id="1_pxqog"]
+[ext_resource type="FontFile" uid="uid://vmn50n25lcld" path="res://asset/font/Marlboro.ttf" id="2_qqu2u"]
+
+[node name="Trailer" type="MarginContainer"]
+offset_right = 183.0
+offset_bottom = 13.0
+script = ExtResource("1_pxqog")
+
+[node name="HBox" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBox"]
+custom_minimum_size = Vector2(105, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/line_spacing = 0
+theme_override_fonts/font = ExtResource("2_qqu2u")
+theme_override_font_sizes/font_size = 14
+text = "Name"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Bars" type="HBoxContainer" parent="HBox"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
